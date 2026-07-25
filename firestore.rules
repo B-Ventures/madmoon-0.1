@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated Admin
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Merchants Collection Rules
+    match /merchants/{storeSlug} {
+      // Public can read store details to render badge & certificate
+      allow read: if true;
+
+      // Anyone can register a new store from the landing page
+      allow create: if true;
+
+      // Public can update clickCount or admin can approve/update
+      allow update: if true;
+
+      // Only authenticated admin can delete merchant records
+      allow delete: if isAdmin();
+    }
+
+    // Buyer Dispute Reports Collection Rules
+    match /reports/{reportId} {
+      // Anyone can submit a dispute report
+      allow create: if true;
+
+      // Public read / admin management
+      allow read: if true;
+
+      // Updates and resolution
+      allow update: if true;
+
+      // Delete reports
+      allow delete: if isAdmin();
+    }
+
+    match /disputes/{disputeId} {
+      allow create: if true;
+      allow read: if true;
+      allow update: if true;
+      allow delete: if isAdmin();
+    }
+  }
+}

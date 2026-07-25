@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "Merchant": {
+      "title": "Merchant Store",
+      "description": "Registered merchant store details and verification status",
+      "type": "object",
+      "properties": {
+        "slug": { "type": "string" },
+        "nameAr": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "websiteUrl": { "type": "string" },
+        "phone": { "type": "string" },
+        "commercialReg": { "type": "string" },
+        "category": { "type": "string" },
+        "country": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "verifiedAt": { "type": "string" },
+        "verificationBadgeId": { "type": "string" },
+        "verificationStatus": { "type": "string", "enum": ["pending", "active", "rejected"] },
+        "tier": { "type": "string" },
+        "domainVerified": { "type": "boolean" },
+        "whatsappVerified": { "type": "boolean" },
+        "crVerified": { "type": "boolean" },
+        "clickCount": { "type": "number" },
+        "reportCount": { "type": "number" },
+        "ownerName": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["slug", "nameAr", "websiteUrl", "commercialReg"]
+    },
+    "Report": {
+      "title": "Buyer Dispute Report",
+      "description": "Dispute reports submitted by buyers",
+      "type": "object",
+      "properties": {
+        "storeSlug": { "type": "string" },
+        "storeName": { "type": "string" },
+        "reporterName": { "type": "string" },
+        "reporterPhone": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "issueType": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewing", "resolved"] }
+      },
+      "required": ["storeSlug", "reporterName", "reporterPhone", "orderNumber"]
+    }
+  },
+  "firestore": {
+    "merchants/{merchantId}": {
+      "entity": "Merchant",
+      "security": {
+        "read": "true",
+        "create": "true",
+        "update": "true",
+        "delete": "request.auth != null"
+      }
+    },
+    "reports/{reportId}": {
+      "entity": "Report",
+      "security": {
+        "read": "true",
+        "create": "true",
+        "update": "true",
+        "delete": "request.auth != null"
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    font-family: 'Tajawal', system-ui, -apple-system, sans-serif !important;
+  }
+
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  code, pre, .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  }
+
+  /* Make form inputs and buttons mobile friendly with minimum touch heights */
+  button, input, select, textarea, a {
+    min-height: 44px;
+  }
+  
+  .inline-btn {
+    min-height: auto;
+  }
+}
+
+/* Custom scrollbar for clean Light UI */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Pulse glow for verified badges in Light Mode */
+@keyframes emeraldPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+  }
+}
+
+.emerald-glow {
+  animation: emeraldPulse 3s infinite ease-in-out;
+}
+
+/* RTL Helpers */
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="search"],
+[dir="rtl"] textarea {
+  text-align: right;
+}
+
+[dir="ltr"] input[type="text"],
+[dir="ltr"] input[type="search"],
+[dir="ltr"] textarea {
+  text-align: left;
+}
+
+/* PWA Mobile Safe Area Spacing */
+.pwa-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}

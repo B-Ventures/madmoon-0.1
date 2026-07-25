@@ -1,0 +1,6 @@
+{
+  "name": "Madmoon (مضمون) - Trust Badge Registry",
+  "description": "Trust-as-a-Service badge and public verification registry for e-commerce stores in Jordan and the GCC.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
