@@ -1,17 +1,18 @@
-const CACHE_NAME = 'madmoon-pwa-v1';
+const CACHE_NAME = 'madmoon-pwa-v2';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/badge.js',
-  '/pwa-icon-192.png',
-  '/pwa-icon-512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './badge.js',
+  './icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
+        console.warn('Failed caching sw assets:', err);
+      });
     }).then(() => self.skipWaiting())
   );
 });
@@ -35,7 +36,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return caches.match('/index.html') || caches.match('/');
+        return caches.match('./index.html') || caches.match('./');
       })
     );
     return;
