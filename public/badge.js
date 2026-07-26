@@ -215,7 +215,7 @@
         ${lang === 'ar' ? 'مضمون 🇯🇴' : 'MADMOON'}
       </span>
       <span class="madmoon-status">
-        ${lang === 'ar' ? 'متجر هوية مؤكدة' : 'Verified Identity Store'}
+        ${lang === 'ar' ? 'متجر مضمون' : 'Verified Identity Store'}
       </span>
     </div>
   `;

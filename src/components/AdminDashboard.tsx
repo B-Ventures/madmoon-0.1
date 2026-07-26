@@ -208,67 +208,67 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       {/* METRICS CARDS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Stores */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-slate-300 transition-all shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 hover:border-slate-300 transition-all shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
               {lang === 'ar' ? 'إجمالي المتاجر' : 'Total Merchants'}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-              <Building2 className="w-5 h-5 text-emerald-800" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+              <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-800" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900">{totalStores}</div>
-          <p className="text-xs font-medium text-slate-500 mt-1">
+          <div className="text-2xl sm:text-3xl font-black text-slate-900">{totalStores}</div>
+          <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1">
             {lang === 'ar' ? 'محتوى قاعدة بيانات Firestore' : 'Stored in Firestore Cloud'}
           </p>
         </div>
 
         {/* Pending Verifications */}
-        <div className="bg-amber-50/50 border border-amber-200 rounded-2xl p-5 hover:border-amber-300 transition-all shadow-2xs">
-          <div className="flex items-center justify-between text-amber-800 mb-3">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider">
-              {lang === 'ar' ? 'قيد التحقق والمراجعة' : 'Pending Verification'}
+        <div className="bg-amber-50/50 border border-amber-200 rounded-2xl p-4 sm:p-5 hover:border-amber-300 transition-all shadow-2xs">
+          <div className="flex items-center justify-between text-amber-800 mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
+              {lang === 'ar' ? 'قيد التحقق' : 'Pending Verification'}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800">
-              <Clock className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800 shrink-0">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-amber-900">{pendingCount}</div>
-          <p className="text-xs font-medium text-amber-800 mt-1">
+          <div className="text-2xl sm:text-3xl font-black text-amber-900">{pendingCount}</div>
+          <p className="text-[11px] sm:text-xs font-medium text-amber-800 mt-1">
             {lang === 'ar' ? 'تتطلب تفعيل واعتماد السجل' : 'Requires CR review & badge activation'}
           </p>
         </div>
 
         {/* Active Verified */}
-        <div className="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-5 hover:border-emerald-300 transition-all shadow-2xs">
-          <div className="flex items-center justify-between text-emerald-800 mb-3">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider">
-              {lang === 'ar' ? 'متاجر موثقة ومفعّلة' : 'Active Verified Stores'}
+        <div className="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-4 sm:p-5 hover:border-emerald-300 transition-all shadow-2xs">
+          <div className="flex items-center justify-between text-emerald-800 mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
+              {lang === 'ar' ? 'متاجر موثقة' : 'Active Verified Stores'}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800">
-              <CheckCircle className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0">
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-emerald-900">{activeCount}</div>
-          <p className="text-xs font-medium text-emerald-800 mt-1">
+          <div className="text-2xl sm:text-3xl font-black text-emerald-900">{activeCount}</div>
+          <p className="text-[11px] sm:text-xs font-medium text-emerald-800 mt-1">
             {lang === 'ar' ? 'تحمل ختم مضمون الرسمي' : 'Official active seal issued'}
           </p>
         </div>
 
         {/* Total Badge Clicks */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-slate-300 transition-all shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 hover:border-slate-300 transition-all shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
               {lang === 'ar' ? 'فحوصات المشتريين' : 'Badge Inspection Clicks'}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-              <TrendingUp className="w-5 h-5 text-teal-700" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-teal-700" />
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900">{totalBadgeClicks.toLocaleString()}</div>
-          <p className="text-xs font-medium text-slate-500 mt-1">
+          <div className="text-2xl sm:text-3xl font-black text-slate-900">{totalBadgeClicks.toLocaleString()}</div>
+          <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1">
             {lang === 'ar' ? 'نقرات تحقق مباشرة على الشهادات' : 'Live buyer verification hits'}
           </p>
         </div>

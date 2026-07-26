@@ -82,7 +82,7 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <Award className="w-5 h-5 text-emerald-800" />
-              <span>{lang === 'ar' ? '1. اختر نوع تصميم الختم (4 تصاميم عالمية)' : '1. Choose Trust Badge Style'}</span>
+              <span>{lang === 'ar' ? '1. اختر نوع تصميم الختم' : '1. Choose Trust Badge Style'}</span>
             </h3>
 
             {/* Style Cards List */}
@@ -103,17 +103,22 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                 }`}>
                   <Building className="w-4 h-4" />
                 </div>
-                <div>
-                  <div className="text-xs font-black text-slate-900">
-                    {lang === 'ar' ? 'فوتر السجل التجاري والرقم الضريبي (مثل متجر رواية)' : 'Government CR & Tax Footer Widget'}
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-black text-slate-900">
+                      {lang === 'ar' ? 'فوتر السجل التجاري والضريبي' : 'CR & Tax Footer Widget'}
+                    </div>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold px-2 py-0.5 rounded-full shrink-0">
+                      {lang === 'ar' ? 'مؤهل ✓ (المستوى 1)' : 'Qualified ✓ (Level 1)'}
+                    </span>
                   </div>
                   <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                    {lang === 'ar' ? 'شريط ترويسة رسمي يظهر السجل التجاري والضريبي وشعار المملكة' : 'Displays Commercial Reg, Tax ID, and National Emblem Badge'}
+                    {lang === 'ar' ? 'شريط رسمي ممتد لفوتر المتجر يظهر بيانات السجل التجاري والضريبي' : 'Full footer banner presenting commercial registration and tax record'}
                   </div>
                 </div>
               </button>
 
-              {/* Option 2: Gold Ribbon Certificate */}
+              {/* Option 2: Premium Crest Seal */}
               <button
                 type="button"
                 onClick={() => setBadgeStyle('ribbon-gold')}
@@ -123,20 +128,25 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                     : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
                 }`}
               >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-400 text-slate-950 flex items-center justify-center shrink-0 font-black text-xs shadow-2xs">
-                  🥇
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-500 text-slate-950 flex items-center justify-center shrink-0 font-black text-xs shadow-2xs">
+                  💎
                 </div>
-                <div>
-                  <div className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                    <span>{lang === 'ar' ? 'الشهادة الذهبية المعتمدة (Gold Ribbon Crest)' : 'Gold Ribbon Crest Badge'}</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                      <span>{lang === 'ar' ? 'ختم الفئة الممتازة (Premium)' : 'Premium Tier Seal'}</span>
+                    </div>
+                    <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-extrabold px-2 py-0.5 rounded-full shrink-0">
+                      {lang === 'ar' ? 'يتطلب تأهيل ممتاز' : 'Requires Premium Qualification'}
+                    </span>
                   </div>
                   <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                    {lang === 'ar' ? 'ختم المتاجر المتميزة ذات المبيعات المرتفعة مع وشاح ذهبي 3D' : 'Gold tier ribbon crest badge for high-trust merchants'}
+                    {lang === 'ar' ? 'وسام النخبة المخصص للمتاجر المتميزة ذات المبيعات والأمان العالي' : 'Elite tier badge for top qualified high-volume merchants'}
                   </div>
                 </div>
               </button>
 
-              {/* Option 3: Silver Ribbon Certificate */}
+              {/* Option 3: Professional Crest Seal */}
               <button
                 type="button"
                 onClick={() => setBadgeStyle('ribbon-silver')}
@@ -146,20 +156,25 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                     : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
                 }`}
               >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-slate-400 to-slate-200 text-slate-900 flex items-center justify-center shrink-0 font-black text-xs shadow-2xs">
-                  🥈
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-slate-600 to-slate-400 text-white flex items-center justify-center shrink-0 font-black text-xs shadow-2xs">
+                  ⭐
                 </div>
-                <div>
-                  <div className="text-xs font-black text-slate-900">
-                    {lang === 'ar' ? 'الشهادة الفضية المعتمدة (Silver Ribbon Crest)' : 'Silver Ribbon Crest Badge'}
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-black text-slate-900">
+                      {lang === 'ar' ? 'ختم الفئة الاحترافية (Professional)' : 'Professional Tier Seal'}
+                    </div>
+                    <span className="text-[10px] bg-slate-200 text-slate-800 border border-slate-300 font-extrabold px-2 py-0.5 rounded-full shrink-0">
+                      {lang === 'ar' ? 'تأهيل احترافي' : 'Professional Tier'}
+                    </span>
                   </div>
                   <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                    {lang === 'ar' ? 'ختم موثق فضي أنيق للتركيب في كافة أجزاء المتجر' : 'Silver tier metallic ribbon crest badge'}
+                    {lang === 'ar' ? 'ختم الاعتماد الاحترافي المصمم للتركيب في مختلف أقسام المتجر' : 'Professional accredited badge suited for placement across all store sections'}
                   </div>
                 </div>
               </button>
 
-              {/* Option 4: BBB / Trustpilot Accredited Rating Box */}
+              {/* Option 4: Accredited Rating Box */}
               <button
                 type="button"
                 onClick={() => setBadgeStyle('accredited-box')}
@@ -172,12 +187,17 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                 <div className="w-8 h-8 rounded-xl bg-emerald-800 text-white flex items-center justify-center shrink-0 font-black text-xs">
                   <Star className="w-4 h-4 fill-emerald-300 text-emerald-300" />
                 </div>
-                <div>
-                  <div className="text-xs font-black text-slate-900">
-                    {lang === 'ar' ? 'مربع التقييم والاعتماد (BBB & Trustpilot Style)' : 'Accredited Business & Stars Seal'}
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-black text-slate-900">
+                      {lang === 'ar' ? 'مربع التقييم والاعتماد' : 'Accreditation Rating Box'}
+                    </div>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold px-2 py-0.5 rounded-full shrink-0">
+                      {lang === 'ar' ? 'مؤهل ✓' : 'Qualified ✓'}
+                    </span>
                   </div>
                   <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                    {lang === 'ar' ? 'مربع الاعتماد بتقييم A+ ونجوم التوثيق مع عدد فحوصات المشترين' : 'Accredited A+ rating box with 5 stars and buyer hits'}
+                    {lang === 'ar' ? 'لوحة الاعتماد بدرجة التقييم وعدد فحوصات المشترين المباشرة' : 'Accreditation rating box displaying buyer check metrics'}
                   </div>
                 </div>
               </button>
@@ -195,12 +215,17 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                 <div className="w-8 h-8 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center shrink-0 font-black text-xs">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
-                <div>
-                  <div className="text-xs font-black text-slate-900">
-                    {lang === 'ar' ? 'الختم العائم الذكي (Sticky Floating Badge)' : 'Smart Floating Corner Seal'}
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs font-black text-slate-900">
+                      {lang === 'ar' ? 'الختم العائم الذكي' : 'Smart Floating Corner Seal'}
+                    </div>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold px-2 py-0.5 rounded-full shrink-0">
+                      {lang === 'ar' ? 'مؤهل ✓ (المستوى 1)' : 'Qualified ✓ (Level 1)'}
+                    </span>
                   </div>
                   <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                    {lang === 'ar' ? 'زر عائم ثابت في زاوية المتجر ينبض بالتفاعل عند مرور المشتري' : 'Sticky interactive badge anchored to bottom screen edge'}
+                    {lang === 'ar' ? 'ختم تفاعلي ثابت في زاوية المتجر يستجيب لزيارات المشترين' : 'Sticky interactive badge anchored to bottom screen corner'}
                   </div>
                 </div>
               </button>
@@ -218,8 +243,8 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                   onChange={(e) => setBadgeTheme(e.target.value as any)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-800"
                 >
-                  <option value="dark">{lang === 'ar' ? 'داكن (Dark Slate)' : 'Dark Slate'}</option>
-                  <option value="emerald">{lang === 'ar' ? 'زمردي رسمي' : 'Emerald Official'}</option>
+                  <option value="dark">{lang === 'ar' ? 'داكن' : 'Dark Slate'}</option>
+                  <option value="emerald">{lang === 'ar' ? 'زمردي رسمي' : 'Official Emerald'}</option>
                   <option value="glass">{lang === 'ar' ? 'فاتح شفاف' : 'Light Glass'}</option>
                 </select>
               </div>
@@ -415,7 +440,7 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                   </div>
                 )}
 
-                {/* STYLE 2: GOLDEN RIBBON CREST (as in Image 2) */}
+                {/* STYLE 2: PREMIUM CREST SEAL */}
                 {badgeStyle === 'ribbon-gold' && (
                   <div
                     onClick={handleBadgeClickInDemo}
@@ -424,57 +449,57 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                     <div className="flex items-center gap-4">
                       {/* Ribbon Crest Badge SVG / Visual */}
                       <div className="relative flex items-center justify-center shrink-0">
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-300 border-2 border-amber-200 shadow-lg flex items-center justify-center text-slate-950 font-black">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 border-2 border-amber-200 shadow-lg flex items-center justify-center text-slate-950 font-black">
                           <ShieldCheck className="w-8 h-8 text-slate-950" />
                         </div>
-                        {/* Golden Ribbon Wings */}
+                        {/* Premium Ribbon Tag */}
                         <div className="absolute -bottom-1 -left-2 bg-amber-600 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-md border border-yellow-200">
-                          GOLD TIER
+                          {lang === 'ar' ? 'الفئة الممتازة' : 'PREMIUM TIER'}
                         </div>
                       </div>
 
                       <div className="text-center sm:text-right rtl:sm:text-right ltr:sm:text-left">
                         <div className="text-xs font-black text-amber-950 flex items-center justify-center sm:justify-start gap-1.5">
-                          <span>{lang === 'ar' ? 'شهادة التوثيق الذهبية - مضمون' : 'Madmoon Gold Certified Badge'}</span>
-                          <span className="bg-amber-200 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">🥇 ذهبية</span>
+                          <span>{lang === 'ar' ? 'مضمون | الفئة الممتازة' : 'Madmoon | Premium Tier'}</span>
+                          <span className="bg-amber-200 text-amber-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full">💎 {lang === 'ar' ? 'ممتاز' : 'Premium'}</span>
                         </div>
                         <p className="text-[11px] text-amber-900 font-medium mt-1">
-                          {lang === 'ar' ? `هوية متجر ${store.nameAr} مؤكدة وسجل تجاري نشط # ${store.commercialReg}` : `Verified CR #${store.commercialReg} with Gold Seal Standard`}
+                          {lang === 'ar' ? `سجل تجاري نشط # ${store.commercialReg} • اعتماد النخبة` : `Active Commercial Record #${store.commercialReg} • Premium Accreditation`}
                         </p>
                       </div>
                     </div>
 
                     <div className="bg-amber-600 text-slate-950 text-xs font-black px-4 py-2 rounded-xl shadow-xs shrink-0 flex items-center gap-1.5">
-                      <span>{lang === 'ar' ? 'تحقق من الشهادة' : 'Inspect Badge'}</span>
+                      <span>{lang === 'ar' ? 'تحقق من الشهادة' : 'Inspect Certificate'}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </div>
                   </div>
                 )}
 
-                {/* STYLE 3: SILVER RIBBON CREST (as in Image 2) */}
+                {/* STYLE 3: PROFESSIONAL CREST SEAL */}
                 {badgeStyle === 'ribbon-silver' && (
                   <div
                     onClick={handleBadgeClickInDemo}
                     className="cursor-pointer bg-slate-100 border-2 border-slate-300 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 hover:bg-slate-200 transition-all shadow-sm"
                   >
                     <div className="flex items-center gap-4">
-                      {/* Silver Ribbon Crest */}
+                      {/* Professional Crest */}
                       <div className="relative flex items-center justify-center shrink-0">
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-slate-400 via-slate-200 to-slate-100 border-2 border-white shadow-md flex items-center justify-center text-slate-900 font-black">
-                          <ShieldCheck className="w-8 h-8 text-slate-800" />
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-slate-700 via-slate-600 to-slate-500 border-2 border-white shadow-md flex items-center justify-center text-white font-black">
+                          <ShieldCheck className="w-8 h-8 text-emerald-300" />
                         </div>
-                        <div className="absolute -bottom-1 -left-2 bg-slate-700 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-md">
-                          SILVER TIER
+                        <div className="absolute -bottom-1 -left-2 bg-slate-800 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-md">
+                          {lang === 'ar' ? 'الفئة الاحترافية' : 'PROFESSIONAL TIER'}
                         </div>
                       </div>
 
                       <div className="text-center sm:text-right rtl:sm:text-right ltr:sm:text-left">
                         <div className="text-xs font-black text-slate-900 flex items-center justify-center sm:justify-start gap-1.5">
-                          <span>{lang === 'ar' ? 'شهادة التوثيق الفضية - مضمون' : 'Madmoon Silver Certified Badge'}</span>
-                          <span className="bg-slate-300 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">🥈 فضية</span>
+                          <span>{lang === 'ar' ? 'مضمون | الفئة الاحترافية' : 'Madmoon | Professional Tier'}</span>
+                          <span className="bg-slate-300 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full">⭐ {lang === 'ar' ? 'احترافي' : 'Professional'}</span>
                         </div>
                         <p className="text-[11px] text-slate-600 font-medium mt-1">
-                          {lang === 'ar' ? `هوية مؤكدة وسجل تجاري معتمد # ${store.commercialReg}` : `Verified CR #${store.commercialReg}`}
+                          {lang === 'ar' ? `سجل تجاري معتمد # ${store.commercialReg} • توثيق احترافي` : `Verified Commercial Record #${store.commercialReg} • Professional Verification`}
                         </p>
                       </div>
                     </div>
@@ -486,7 +511,7 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                   </div>
                 )}
 
-                {/* STYLE 4: BBB / TRUSTPILOT ACCREDITED BUSINESS BOX (as in Image 3) */}
+                {/* STYLE 4: ACCREDITED RATING BOX */}
                 {badgeStyle === 'accredited-box' && (
                   <div
                     onClick={handleBadgeClickInDemo}
@@ -498,12 +523,14 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                         A+
                       </div>
                       <div className="text-right leading-none">
-                        <span className="block text-[10px] font-extrabold uppercase text-emerald-200 tracking-wider">ACCREDITED BUSINESS</span>
+                        <span className="block text-[10px] font-extrabold uppercase text-emerald-200 tracking-wider">
+                          {lang === 'ar' ? 'درجة الاعتماد' : 'ACCREDITATION SCORE'}
+                        </span>
                         <span className="text-xs font-black text-white">{lang === 'ar' ? 'متجر معتمد وموثق' : 'Verified Merchant'}</span>
                       </div>
                     </div>
 
-                    {/* STARS & REVIEWS (Trustpilot Style) */}
+                    {/* STARS & REVIEWS */}
                     <div className="text-center sm:text-right">
                       <div className="flex items-center justify-center sm:justify-start gap-1 text-emerald-400 mb-0.5">
                         {[1, 2, 3, 4, 5].map((s) => (
@@ -517,7 +544,7 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                     </div>
 
                     <div className="text-xs font-black text-emerald-400 flex items-center gap-1 shrink-0">
-                      <span>Madmoon Verified</span>
+                      <span>{lang === 'ar' ? 'توثيق مضمون' : 'Madmoon Verified'}</span>
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     </div>
                   </div>
@@ -534,7 +561,7 @@ export const BadgeGenerator: React.FC<BadgeGeneratorProps> = ({
                         <ShieldCheck className="w-5 h-5" />
                       </div>
                       <div className="text-right leading-none">
-                        <div className="text-xs font-black text-white">مضمون | هوية مؤكدة ✓</div>
+                        <div className="text-xs font-black text-white">مضمون | متجر مضمون ✓</div>
                         <div className="text-[10px] text-emerald-200 font-mono mt-0.5">{store.verificationBadgeId}</div>
                       </div>
                       <span className="w-2 h-2 rounded-full bg-emerald-300 animate-ping" />

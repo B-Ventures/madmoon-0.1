@@ -42,7 +42,7 @@ export const translations = {
     demoTitle: 'معاينة تفاعلية حية على متجر تجريبي',
     demoInstruction: 'انقر على ختم مضمون الأخضر في زاوية المتجر أدناه لتجربة تجربة المشتري الحقيقية واكتساب الثقة!',
     verifyTitle: 'شهادة التوثيق الرسمية للمتجر',
-    verifiedStatus: 'مضمون | متجر هوية مؤكدة ✓',
+    verifiedStatus: 'مضمون | متجر مضمون ✓',
     verificationDetails: 'تفاصيل سجل التوثيق والتحقق القانوني',
     domainVerified: 'ملكية النطاق الإلكتروني',
     whatsappVerified: 'رقم الواتساب والدعم المباشر',

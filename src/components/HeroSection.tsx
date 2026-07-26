@@ -42,7 +42,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               {t.heroHeadline}
             </h1>
 
-            <p className="mt-5 text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl">
+            <p className="mt-5 text-lg sm:text-xl text-slate-700 font-medium leading-relaxed max-w-2xl">
               {t.heroSubheadline}
             </p>
 
@@ -126,7 +126,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                         <span>مضمون 🇯🇴</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                       </div>
-                      <div className="text-xs font-bold text-white">متجر هوية مؤكدة</div>
+                      <div className="text-xs font-bold text-white">متجر مضمون</div>
                     </div>
                   </div>
                 </div>
@@ -260,7 +260,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs py-2 px-2.5 bg-slate-50 rounded-lg border border-slate-200">
+                  <div className="flex items-center justify-between text-xs py-2 px-2.5 bg-slate-50/80 rounded-lg border border-slate-100">
                     <span className="text-slate-600 font-medium">
                       {lang === 'ar' ? 'السجل التجاري' : 'Commercial Reg'}
                     </span>
@@ -273,7 +273,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                   <div className="inline-flex items-center gap-1 text-emerald-800 font-extrabold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{lang === 'ar' ? 'مضمون مؤكد' : 'Verified'}</span>
+                    <span>{lang === 'ar' ? 'مضمون' : 'Verified'}</span>
                   </div>
                   <span className="text-slate-500 text-[11px] font-semibold">
                     {store.clickCount.toLocaleString()} {lang === 'ar' ? 'نقرة' : 'clicks'}

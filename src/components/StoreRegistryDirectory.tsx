@@ -160,12 +160,12 @@ export const StoreRegistryDirectory: React.FC<StoreRegistryDirectoryProps> = ({
 
                   {/* Badges / Details */}
                   <div className="space-y-2 mb-4">
-                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                    <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
                       <span className="text-slate-600 font-medium">{lang === 'ar' ? 'السجل التجاري' : 'Commercial Reg'}</span>
                       <span className="font-mono text-slate-900 font-extrabold">{store.commercialReg}</span>
                     </div>
 
-                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                    <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
                       <span className="text-slate-600 font-medium">{lang === 'ar' ? 'الهاتف المعتمد' : 'Hotline'}</span>
                       <span className="font-mono text-slate-800 font-bold dir-ltr">{store.phone}</span>
                     </div>
