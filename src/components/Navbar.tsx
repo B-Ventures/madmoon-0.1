@@ -45,10 +45,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
                   {lang === 'ar' ? 'مَضمون' : 'Madmoon'}
                 </span>
-                <span className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-extrabold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  {lang === 'ar' ? 'توثيق' : 'Verified'}
-                </span>
               </div>
             </div>
           </button>

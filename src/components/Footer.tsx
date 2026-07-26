@@ -57,17 +57,9 @@ export const Footer: React.FC<FooterProps> = ({ lang, setActiveTab }) => {
 
         </div>
 
-        {/* Legal Notice */}
-        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs text-slate-600 font-medium text-center leading-relaxed">
-          {t.footerNotice}
-        </div>
-
         {/* Bottom Rights */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium pt-4 border-t border-slate-100">
           <p>{t.footerRights}</p>
-          <div className="flex items-center gap-1">
-            <span>{lang === 'ar' ? 'مصمم ومطور للتجارة الإلكترونية في الأردن والخليج العربي' : 'Designed for E-Commerce in Jordan & GCC'}</span>
-          </div>
         </div>
 
       </div>

@@ -93,7 +93,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <div className="w-3 h-3 rounded-full bg-rose-400"></div>
                   <div className="w-3 h-3 rounded-full bg-amber-400"></div>
                   <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                  <span className="text-xs font-mono text-slate-400 mr-2">storefront-footer.html</span>
                 </div>
                 <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
                   {lang === 'ar' ? 'معاينة ختم الثقة المباشر' : 'Live Trust Badge Preview'}
