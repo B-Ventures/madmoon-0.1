@@ -35,4 +35,4 @@ jobs:
         with:
           folder: dist
           branch: gh-pages
-          cname: madmoon.jo
+          clean: true
