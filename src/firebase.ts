@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp, deleteApp } from 'firebase/app';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -206,6 +206,22 @@ export async function updateReportStatusInFirestore(reportId: string, status: 'p
   } catch (error) {
     console.error('Error updating report status in Firestore:', error);
     throw error;
+  }
+}
+
+/**
+ * Creates a secondary admin user on Firebase Auth without disturbing active primary admin session
+ */
+export async function createSecondaryAdminAccount(email: string, pass: string) {
+  const secondaryAppName = `AdminProvision_${Date.now()}`;
+  const secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
+  const secondaryAuth = getAuth(secondaryApp);
+  try {
+    const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+    await signOut(secondaryAuth);
+    return userCred.user;
+  } finally {
+    await deleteApp(secondaryApp).catch(console.warn);
   }
 }
 

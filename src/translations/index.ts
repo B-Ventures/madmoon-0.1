@@ -9,7 +9,7 @@ export const translations = {
     navAbout: 'عن مضمون',
     navAdmin: 'لوحة الإدارة',
     langSwitch: 'English',
-    heroBadge: 'المنصة الوطنية لتوثيق الهوية التجارية والشركات في الأردن والخليج 🇯🇴 🇸🇦 🇦🇪',
+    heroBadge: 'المنصة الإقليمية لتوثيق الهوية التجارية والأعمال الرقمية في الشرق الأوسط وشمال إفريقيا 🌍',
     heroHeadline: 'أضف ختم مضمون لمنشأتك وزد ثقة عملائك ونسبة إتمام الشراء',
     heroSubheadline: 'نوثّق السجل التجاري والهوية ورقم التواصل الرسمي للمتاجر الإلكترونية، المنشآت، مزودي الخدمات، وصناع المحتوى لمنح عملائك أماناً كاملاً.',
     heroCtaPrimary: 'سجّل منشأتك واحصل على الختم مجاناً',
@@ -66,7 +66,7 @@ export const translations = {
     submitReportBtn: 'إرسال البلاغ لفريق مضمون',
     reportSuccessMsg: 'تم استلام بلاغك بنجاح وسيتواصل معك فريق الدعم والامتثال خلال 24 ساعة.',
     directoryTitle: 'سجل المنشآت والأعمال الموثقة',
-    directorySub: 'تصفح قائمة المتاجر والمنشآت والشركات التي تحمل ختم مضمون المعتمد في الأردن والخليج العربي',
+    directorySub: 'تصفح قائمة المتاجر والمنشآت والشركات التي تحمل ختم مضمون المعتمد في الشرق الأوسط وشمال إفريقيا (MENA)',
     searchPlaceholder: 'ابحث باسم المنشأة، السجل التجاري، أو النطاق...',
     filterAllCountries: 'جميع الدول',
     filterAllCategories: 'جميع التصنيفات',
@@ -79,7 +79,7 @@ export const translations = {
     catServices: 'خدمات إلكترونية واستشارات',
     catGeneral: 'منشأة عامة / تجارة',
     footerRights: 'جميع الحقوق محفوظة منصة مضمون لتوثيق المنشآت والأعمال الرقمية',
-    footerNotice: 'مضمون هي منصة مستقلة لتوثيق الهوية الرقمية والسجلات التجارية للمنشآت والمتاجر والأعمال في الأردن ودول مجلس التعاون الخليجي.'
+    footerNotice: 'مضمون هي منصة إقليمية مستقلة لتوثيق الهوية الرقمية والسجلات التجارية للمنشآت والمتاجر والأعمال في الشرق الأوسط وشمال إفريقيا (MENA).'
   },
   en: {
     brandName: 'Madmoon',
@@ -91,7 +91,7 @@ export const translations = {
     navAbout: 'About Madmoon',
     navAdmin: 'Admin Panel',
     langSwitch: 'العربية',
-    heroBadge: 'The premier identity verification platform in Jordan & GCC 🇯🇴 🇸🇦 🇦🇪',
+    heroBadge: 'The regional platform for validating commercial identity and digital business in the Middle East & North Africa (MENA) 🌍',
     heroHeadline: 'Add the Madmoon seal to your business, boost buyer trust & conversion rates',
     heroSubheadline: 'Instantly validate your commercial registration, identity, and official contact channel for e-commerce stores, service agencies, and freelancers.',
     heroCtaPrimary: 'Register Your Business & Get Free Seal',
@@ -148,7 +148,7 @@ export const translations = {
     submitReportBtn: 'Submit Report to Compliance Team',
     reportSuccessMsg: 'Your report was received successfully. Madmoon compliance will review and reach out within 24 hours.',
     directoryTitle: 'Verified Businesses & Entities Public Registry',
-    directorySub: 'Browse all e-commerce stores, agencies, and companies carrying the official Madmoon seal in Jordan & GCC',
+    directorySub: 'Browse all e-commerce stores, agencies, and companies carrying the official Madmoon seal in the Middle East & North Africa (MENA)',
     searchPlaceholder: 'Search by business name, CR number, or domain...',
     filterAllCountries: 'All Countries',
     filterAllCategories: 'All Categories',
@@ -161,6 +161,6 @@ export const translations = {
     catServices: 'Digital Services & Consulting',
     catGeneral: 'General Business / Enterprise',
     footerRights: 'All Rights Reserved © Madmoon Trust Registry',
-    footerNotice: 'Madmoon is an independent trust-as-a-service platform validating digital identity and commercial registrations for stores, agencies, and entities across Jordan and GCC countries.'
+    footerNotice: 'Madmoon is an independent regional trust platform validating digital identity and commercial registrations across the Middle East & North Africa (MENA).'
   }
 };

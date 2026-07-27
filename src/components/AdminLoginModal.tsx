@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, ShieldCheck, Mail, Key, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Lock, ShieldCheck, Mail, Key, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Language } from '../types';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, auth } from '../firebase';
+import { signInWithEmailAndPassword, auth } from '../firebase';
 
 interface AdminLoginModalProps {
   lang: Language;
@@ -14,68 +14,41 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   onLoginSuccess,
   onCancel
 }) => {
-  const [email, setEmail] = useState('admin@madmoon.jo');
-  const [password, setPassword] = useState('Madmoon2026!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Check strict authorized demo credentials first
-    const isAuthorizedAdmin = cleanEmail === 'admin@madmoon.jo' && password === 'Madmoon2026!';
+    if (!cleanEmail || !password) {
+      setError(
+        lang === 'ar'
+          ? 'يرجى إدخال البريد الإلكتروني وكلمة المرور'
+          : 'Please enter both email and password'
+      );
+      setLoading(false);
+      return;
+    }
 
     try {
-      // Attempt login with Firebase Auth
+      // Sign in existing admin user on Firebase Auth
       await signInWithEmailAndPassword(auth, cleanEmail, password);
       onLoginSuccess();
     } catch (err: any) {
-      console.warn('Firebase Auth Login note:', err);
-      
-      // If user typed authorized admin credentials, attempt creating the user or log in directly
-      if (isAuthorizedAdmin) {
-        try {
-          await createUserWithEmailAndPassword(auth, cleanEmail, password);
-        } catch (createErr) {
-          // ignore creation error if already exists
-        }
-        onLoginSuccess();
-        return;
+      console.error('Firebase Auth Admin Error:', err);
+      let msg = err.message || '';
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        msg = lang === 'ar' 
+          ? 'بيانات الدخول غير صحيحة! يرجى التأكد من البريد الإلكتروني وكلمة المرور.' 
+          : 'Invalid credentials! Please check your email and password.';
       }
-      
-      // STRICT ERROR FOR INVALID CREDENTIALS
-      setError(
-        lang === 'ar' 
-          ? 'خطأ في بيانات الدخول! البريد الإلكتروني أو كلمة المرور غير صحيحة.' 
-          : 'Invalid credentials! Email or password is incorrect.'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickDemoLogin = async () => {
-    setLoading(true);
-    setError(null);
-    setEmail('admin@madmoon.jo');
-    setPassword('Madmoon2026!');
-    try {
-      try {
-        await signInWithEmailAndPassword(auth, 'admin@madmoon.jo', 'Madmoon2026!');
-      } catch (err) {
-        try {
-          await createUserWithEmailAndPassword(auth, 'admin@madmoon.jo', 'Madmoon2026!');
-        } catch (cErr) {
-          // ignore
-        }
-      }
-      onLoginSuccess();
-    } catch (e) {
-      onLoginSuccess();
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -94,7 +67,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           </h2>
           <p className="text-xs font-medium text-slate-500 mt-2">
             {lang === 'ar' 
-              ? 'منطقة مخصصة لفريق الامتثال والتحقق في مضمون (Firebase Auth Protected)'
+              ? 'منطقة مخصصة لفريق الامتثال والتحقق في مضمون (Firebase Auth Security)'
               : 'Restricted access for Madmoon Compliance & Verification Team'}
           </p>
         </div>
@@ -106,10 +79,10 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleAuthSubmit} className="space-y-5">
           <div>
             <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2">
-              {lang === 'ar' ? 'البريد الإلكتروني' : 'Admin Email'}
+              {lang === 'ar' ? 'البريد الإلكتروني للمسؤول' : 'Admin Email'}
             </label>
             <div className="relative">
               <Mail className="w-5 h-5 text-slate-400 absolute left-3 top-3.5 rtl:right-3 rtl:left-auto" />
@@ -118,7 +91,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@madmoon.jo"
+                placeholder="admin@yourdomain.com"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 font-medium focus:outline-none focus:bg-white focus:border-emerald-800 ltr:pl-10 rtl:pr-10"
               />
             </div>
@@ -157,32 +130,14 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           </button>
         </form>
 
-        <div className="relative my-6 text-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
-          </div>
-          <span className="relative bg-white px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-            {lang === 'ar' ? 'أو الوصول السريع للعلامة' : 'OR QUICK DEMO ACCESS'}
-          </span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleQuickDemoLogin}
-          disabled={loading}
-          className="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-extrabold py-3 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-2 shadow-2xs"
-        >
-          <CheckCircle2 className="w-4 h-4 text-emerald-800" />
-          <span>{lang === 'ar' ? 'دخول تجريبي بضغطة واحدة (Admin Demo)' : 'One-Click Admin Demo Login'}</span>
-        </button>
-
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="w-full mt-4 text-slate-500 hover:text-slate-800 text-xs font-bold text-center"
+            className="w-full mt-6 text-slate-500 hover:text-slate-800 text-xs font-bold text-center flex items-center justify-center gap-1"
           >
-            {lang === 'ar' ? 'الرجوع إلى الموقع الرئيسي' : 'Return to Home'}
+            <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+            <span>{lang === 'ar' ? 'الرجوع إلى الموقع الرئيسي' : 'Return to Home'}</span>
           </button>
         )}
       </div>

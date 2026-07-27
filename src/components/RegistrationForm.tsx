@@ -294,12 +294,16 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
         const confirmation = await signInWithPhoneNumber(auth, formattedFullPhone, recaptcha);
         setConfirmationResult(confirmation);
+        setOtpSent(true);
       }
-      setOtpSent(true);
     } catch (err: any) {
-      console.warn("SMS Auth Notice (Using demo fallback if unconfigured):", err);
-      // Graceful fallback for test/dev environment
-      setOtpSent(true);
+      console.error("Firebase SMS OTP dispatch error:", err);
+      setConfirmationResult(null);
+      setOtpError(
+        lang === 'ar'
+          ? `لم يتم إرسال رمز SMS عبر Firebase: ${err?.message || 'يرجى التأكد من إعدادات Firebase Phone Auth ورقم الهاتف'}`
+          : `Failed to send SMS OTP via Firebase: ${err?.message || 'Please check Firebase Phone Auth settings and phone number'}`
+      );
     } finally {
       setOtpLoading(false);
     }
@@ -317,14 +321,15 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
     setOtpError(null);
 
     try {
-      if (confirmationResult) {
-        await confirmationResult.confirm(otpCode);
-      } else {
-        // Fallback test code verification
-        if (otpCode !== '123456' && otpCode.length < 6) {
-          throw new Error('Invalid code');
-        }
+      if (!confirmationResult) {
+        throw new Error(
+          lang === 'ar'
+            ? 'لم يتم استلام جلسة تأكيد الرمز من Firebase. يرجى الضغط على "إعادة إرسال رمز SMS".'
+            : 'Firebase SMS confirmation session not found. Please click "Resend SMS Code".'
+        );
       }
+
+      await confirmationResult.confirm(otpCode);
 
       const slug = generateUniqueSlug(storeName, existingStores);
       const cleanUrl = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
@@ -372,11 +377,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
     } catch (err: any) {
       console.error(err);
       setIsSubmitting(false);
-      const isProd = Boolean(import.meta.env.PROD || process.env.NODE_ENV === 'production');
       setOtpError(
         lang === 'ar' 
-          ? (isProd ? 'رمز التحقق غير صحيح، يرجى إعادة المحاولة.' : 'رمز التحقق غير صحيح، يرجى إعادة المحاولة (كود التجربة: 123456)') 
-          : (isProd ? 'Invalid verification code. Please try again.' : 'Invalid verification code. Please try again (demo code: 123456)')
+          ? 'رمز التحقق غير صحيح أو انتهت صلاحيته. يرجى التحقق من الرسائل النصية وإعادة المحاولة.' 
+          : 'Invalid or expired OTP code. Please check your SMS messages and try again.'
       );
     }
   };
@@ -979,7 +983,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   required
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="123456"
+                  placeholder="●●●●●●"
                   className="w-full bg-[#F8FAFC] border-2 border-emerald-600/40 focus:border-[#047857] rounded-2xl px-4 py-4 text-center text-2xl font-mono font-black tracking-widest text-slate-900 focus:outline-none transition-colors"
                 />
               </div>
@@ -998,12 +1002,8 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 </div>
                 <p>
                   {lang === 'ar'
-                    ? (Boolean(import.meta.env.PROD || process.env.NODE_ENV === 'production')
-                        ? 'يتم إرسال رمز التحقق لمنع الاحتيال وضمان ملكية الهاتف والتأكد من موثوقية النشاط.'
-                        : 'يتم إرسال رمز التحقق لمنع الاحتيال وضمان ملكية الرقم. (للتجربة السريعة يمكنك إدخال الكود: 123456).')
-                    : (Boolean(import.meta.env.PROD || process.env.NODE_ENV === 'production')
-                        ? 'SMS OTP verification guarantees merchant contact identity and prevents fraud.'
-                        : 'OTP verification guarantees merchant identity. (Demo testing code: 123456).')}
+                    ? 'يتم إرسال رمز التحقق عبر SMS بواسطة Firebase Authentication لتوثيق ملكية رقم الهاتف ومنع الاحتيال.'
+                    : 'SMS OTP code is sent via Firebase Authentication to verify your phone number and prevent fraud.'}
                 </p>
               </div>
 
@@ -1023,13 +1023,25 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   )}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setStep('form')}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs py-3 rounded-xl transition-all"
-                >
-                  {lang === 'ar' ? '← العودة لتعديل البيانات' : '← Back to Edit Form'}
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={triggerSendOtp}
+                    disabled={otpLoading}
+                    className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-[#047857] font-extrabold text-xs py-3 rounded-xl transition-all disabled:opacity-50"
+                  >
+                    {otpLoading
+                      ? (lang === 'ar' ? 'جاري الإرسال...' : 'Sending...')
+                      : (lang === 'ar' ? 'إعادة إرسال رمز SMS' : 'Resend SMS Code')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep('form')}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs py-3 rounded-xl transition-all"
+                  >
+                    {lang === 'ar' ? '← تعديل البيانات' : '← Edit Form'}
+                  </button>
+                </div>
               </div>
 
             </form>

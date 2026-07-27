@@ -31,7 +31,10 @@ import {
   Tag,
   Sparkles,
   Shield,
-  ArrowUpRight
+  ArrowUpRight,
+  UserPlus,
+  Mail,
+  Key
 } from 'lucide-react';
 import { Language, MerchantStore, DisputeReport } from '../types';
 import { 
@@ -41,7 +44,8 @@ import {
   updateReportStatusInFirestore,
   seedInitialStoresIfEmpty,
   signOut,
-  auth
+  auth,
+  createSecondaryAdminAccount
 } from '../firebase';
 
 interface AdminDashboardProps {
@@ -69,6 +73,71 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Active Store Modal State for deep inspection
   const [selectedStore, setSelectedStore] = useState<MerchantStore | null>(null);
   const [activeMenuStoreId, setActiveMenuStoreId] = useState<string | null>(null);
+
+  // Add Admin Account Modal State
+  const [isAddAdminOpen, setIsAddAdminOpen] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [addAdminLoading, setAddAdminLoading] = useState(false);
+  const [addAdminError, setAddAdminError] = useState<string | null>(null);
+
+  const handleCreateNewAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddAdminLoading(true);
+    setAddAdminError(null);
+
+    const cleanEmail = newAdminEmail.trim().toLowerCase();
+    if (!cleanEmail || !newAdminPassword) {
+      setAddAdminError(
+        lang === 'ar'
+          ? 'يرجى إدخال البريد الإلكتروني وكلمة المرور للمسؤول الجديد'
+          : 'Please enter both email and password for the new admin'
+      );
+      setAddAdminLoading(false);
+      return;
+    }
+
+    if (newAdminPassword.length < 6) {
+      setAddAdminError(
+        lang === 'ar'
+          ? 'يجب أن تتكون كلمة المرور من 6 خانات على الأقل'
+          : 'Password must be at least 6 characters long'
+      );
+      setAddAdminLoading(false);
+      return;
+    }
+
+    try {
+      await createSecondaryAdminAccount(cleanEmail, newAdminPassword);
+      showToast(
+        lang === 'ar'
+          ? `[ ✓ تم تسجيل مسؤول جديد ] (${cleanEmail}) بنجاح على Firebase`
+          : `[ ✓ New Admin Registered ] (${cleanEmail}) successfully on Firebase`
+      );
+      setNewAdminEmail('');
+      setNewAdminPassword('');
+      setIsAddAdminOpen(false);
+    } catch (err: any) {
+      console.error('Create admin error:', err);
+      let msg = err?.message || '';
+      if (err?.code === 'auth/email-already-in-use') {
+        msg = lang === 'ar'
+          ? 'هذا البريد الإلكتروني مسجل بالفعل كمسؤول في Firebase Auth.'
+          : 'This email is already registered on Firebase Auth.';
+      } else if (err?.code === 'auth/invalid-email') {
+        msg = lang === 'ar'
+          ? 'صيغة البريد الإلكتروني غير صحيحة.'
+          : 'Invalid email address format.';
+      } else if (err?.code === 'auth/weak-password') {
+        msg = lang === 'ar'
+          ? 'كلمة المرور ضعيفة جداً (يجب ألا تقل عن 6 خانات).'
+          : 'Password is too weak (must be at least 6 characters).';
+      }
+      setAddAdminError(msg);
+    } finally {
+      setAddAdminLoading(false);
+    }
+  };
 
   // Subscribe to Firestore Realtime Data
   useEffect(() => {
@@ -216,7 +285,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3 z-10 w-full md:w-auto">
+        <div className="flex items-center gap-2.5 z-10 w-full md:w-auto flex-wrap sm:flex-nowrap">
+          <button
+            onClick={() => setIsAddAdminOpen(true)}
+            className="flex-1 md:flex-none bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-[#047857] font-black px-3.5 py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4 text-[#047857]" />
+            <span>{lang === 'ar' ? 'إضافة مسؤول جديد' : 'Add Admin User'}</span>
+          </button>
+
           <button
             onClick={onNavigateToRegister}
             className="flex-1 md:flex-none bg-[#047857] hover:bg-[#036247] text-white font-black px-4 py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer"
@@ -446,7 +523,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <p className="font-extrabold text-slate-800 text-sm">{lang === 'ar' ? 'لا توجد متاجر تطابق البحث الحقيقي' : 'No stores match your search'}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[220px]">
               <table className="w-full text-right rtl:text-right ltr:text-left text-xs text-slate-700">
                 
                 <thead className="bg-slate-50/80 text-slate-600 uppercase text-[10px] font-black tracking-wider border-b border-slate-200">
@@ -461,9 +538,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </thead>
 
                 <tbody className="divide-y divide-slate-100 font-medium">
-                  {filteredMerchants.map((store) => {
+                  {filteredMerchants.map((store, index) => {
                     const status = store.verificationStatus || (store.domainVerified ? 'active' : 'pending');
                     const isMenuOpen = activeMenuStoreId === store.id;
+                    const isNearBottom = index >= filteredMerchants.length - 2 && filteredMerchants.length > 2;
 
                     return (
                       <tr 
@@ -599,9 +677,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 />
                               )}
 
-                              {/* Dropdown Menu Popup - anchored inwards toward table center */}
+                              {/* Dropdown Menu Popup - opens upwards if near bottom of table */}
                               {isMenuOpen && (
-                                <div className="absolute ltr:right-0 ltr:left-auto rtl:left-0 rtl:right-auto mt-1 w-52 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-30 py-1.5 animate-fadeIn text-right rtl:text-right ltr:text-left">
+                                <div className={`absolute ltr:right-0 ltr:left-auto rtl:left-0 rtl:right-auto w-56 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-30 py-1.5 animate-fadeIn text-right rtl:text-right ltr:text-left max-h-64 overflow-y-auto ${
+                                  isNearBottom ? 'bottom-full mb-1 origin-bottom' : 'top-full mt-1 origin-top'
+                                }`}>
                                   
                                   <button
                                     onClick={() => {
@@ -892,6 +972,110 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Create New Admin Modal */}
+      {isAddAdminOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <button
+              onClick={() => {
+                setIsAddAdminOpen(false);
+                setAddAdminError(null);
+              }}
+              className="absolute top-5 left-5 rtl:right-5 rtl:left-auto text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full p-1.5 transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 bg-emerald-50 border border-emerald-200 rounded-2xl mx-auto flex items-center justify-center mb-3 text-[#047857] shadow-2xs">
+                <UserPlus className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                {lang === 'ar' ? 'إضافة حساب مسؤول جديد (Firebase)' : 'Register New Admin Account'}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 font-medium">
+                {lang === 'ar'
+                  ? 'إنشاء اعتماد مسؤول جديد لدخول لوحة التحكم والامتثال'
+                  : 'Grant new admin credentials for compliance dashboard access'}
+              </p>
+            </div>
+
+            {addAdminError && (
+              <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium p-3.5 rounded-xl flex items-center gap-2.5">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-700" />
+                <span>{addAdminError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateNewAdmin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-1.5">
+                  {lang === 'ar' ? 'البريد الإلكتروني للمسؤول الجديد' : 'New Admin Email'}
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 rtl:right-3 rtl:left-auto" />
+                  <input
+                    type="email"
+                    required
+                    value={newAdminEmail}
+                    onChange={(e) => setNewAdminEmail(e.target.value)}
+                    placeholder="admin2@domain.com"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:bg-white focus:border-[#047857] ltr:pl-9 rtl:pr-9"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-1.5">
+                  {lang === 'ar' ? 'كلمة المرور' : 'Password'}
+                </label>
+                <div className="relative">
+                  <Key className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 rtl:right-3 rtl:left-auto" />
+                  <input
+                    type="password"
+                    required
+                    value={newAdminPassword}
+                    onChange={(e) => setNewAdminPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:bg-white focus:border-[#047857] ltr:pl-9 rtl:pr-9"
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  {lang === 'ar' ? 'يجب أن لا تقل كلمة المرور عن 6 خانات' : 'Password must be at least 6 characters'}
+                </p>
+              </div>
+
+              <div className="pt-2 flex gap-2">
+                <button
+                  type="submit"
+                  disabled={addAdminLoading}
+                  className="flex-1 bg-[#047857] hover:bg-[#036247] text-white font-extrabold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {addAdminLoading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                      <span>{lang === 'ar' ? 'حفظ وتأهيل المسؤول' : 'Register Admin User'}</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddAdminOpen(false);
+                    setAddAdminError(null);
+                  }}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3 px-4 rounded-xl text-xs transition-all cursor-pointer"
+                >
+                  {lang === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

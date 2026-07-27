@@ -29,8 +29,8 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
         </h2>
         <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-normal">
           {lang === 'ar'
-            ? 'تُعد المتاجر الإلكترونية في الأردن والخليج العربي ركيزة التجارة القادمة. مضمون هي الشارة الموحدة التي تنهي شكوك المشتري وتبني مصداقية قانونية فورية.'
-            : 'Eliminate cart abandonment and buyer skepticism with official, automated commercial registry validation for online stores in Jordan and GCC.'}
+            ? 'تُعد المتاجر والمنشآت الرقمية في الشرق الأوسط وشمال إفريقيا (MENA) ركيزة التجارة القادمة. مضمون هي الشارة الموحدة التي تنهي شكوك المشتري وتبني مصداقية قانونية فورية.'
+            : 'Eliminate cart abandonment and buyer skepticism with official, automated commercial registry validation for online stores across the Middle East & North Africa (MENA).'}
         </p>
       </div>
 
@@ -108,8 +108,8 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
 
           <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
             <CheckCircle2 className="w-6 h-6 text-emerald-700" />
-            <h4 className="text-sm font-black text-slate-900">{lang === 'ar' ? 'تغطية الأردن والخليج' : 'Jordan & GCC Coverage'}</h4>
-            <p className="text-xs text-slate-600 font-medium">{lang === 'ar' ? 'دعم كامل للسجلات التجارية في الأردن، السعودية، الإمارات، والكويت.' : 'Full registry support for Jordan, KSA, UAE, and Kuwait.'}</p>
+            <h4 className="text-sm font-black text-slate-900">{lang === 'ar' ? 'تغطية الشرق الأوسط وشمال إفريقيا' : 'MENA Regional Coverage'}</h4>
+            <p className="text-xs text-slate-600 font-medium">{lang === 'ar' ? 'تغطية شمولية لكافة المنشآت والأعمال الرقمية والمتاجر عبر دول منطقة الشرق الأوسط وشمال إفريقيا (MENA).' : 'Comprehensive coverage for all entities, digital businesses, and stores across the Middle East & North Africa (MENA) region.'}</p>
           </div>
 
           <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">

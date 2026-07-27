@@ -9,7 +9,7 @@ export type StoreCategory =
   | 'services'
   | 'general';
 
-export type CountryCode = 'JO' | 'UAE' | 'KSA' | 'KW' | 'BH' | 'QA';
+export type CountryCode = 'JO' | 'UAE' | 'KSA' | 'KW' | 'BH' | 'QA' | 'EG' | 'MA' | 'TN' | 'DZ' | 'OM' | 'IQ' | 'LB';
 
 export interface CountryInfo {
   code: CountryCode;

@@ -29,6 +29,7 @@ import {
 import { 
   auth, 
   onAuthStateChanged, 
+  signOut,
   subscribeToMerchants, 
   incrementClickCountInFirestore,
   seedInitialStoresIfEmpty
@@ -223,6 +224,7 @@ export default function App() {
   };
 
   const handleAdminLogout = () => {
+    signOut(auth).catch(console.warn);
     setIsAdminAuthenticated(false);
     localStorage.removeItem('madmoon_admin_logged');
     setActiveTab('home');

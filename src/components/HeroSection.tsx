@@ -218,7 +218,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900">
-                {lang === 'ar' ? 'أبرز المتاجر الموثقة حديثاً في الأردن والخليج' : 'Recently Verified Stores in Jordan & GCC'}
+                {lang === 'ar' ? 'أبرز المتاجر والمنشآت الموثقة حديثاً في الشرق الأوسط وشمال إفريقيا (MENA)' : 'Recently Verified Businesses in Middle East & North Africa (MENA)'}
               </h2>
               <p className="text-xs text-slate-600 mt-1 font-medium">
                 {lang === 'ar' ? 'انقر على أي متجر لمشاهدة شهادة التوثيق الحية ورقم السجل التجاري' : 'Click any store to inspect its live verification certificate'}
