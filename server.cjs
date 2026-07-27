@@ -24,30 +24,24 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 // server.ts
 var import_express = __toESM(require("express"), 1);
 var import_path = __toESM(require("path"), 1);
+var import_fs = __toESM(require("fs"), 1);
 var import_vite = require("vite");
 var import_app = require("firebase/app");
 var import_firestore = require("firebase/firestore");
-
-// firebase-applet-config.json
-var firebase_applet_config_default = {
-  projectId: "gen-lang-client-0823624253",
-  appId: "1:543187483069:web:7de26149fff4f7b7a4bad4",
-  apiKey: "AIzaSyAMGwz1YTFp7pzSJhteSde8AclK-uaBAhk",
-  authDomain: "gen-lang-client-0823624253.firebaseapp.com",
-  firestoreDatabaseId: "ai-studio-madmoontrustbadg-65b6ef74-b70b-422d-8cd7-631c2d824590",
-  storageBucket: "gen-lang-client-0823624253.firebasestorage.app",
-  messagingSenderId: "543187483069",
-  measurementId: "",
-  oAuthClientId: "543187483069-9f84j7qv81jdm0ojqvn09ksboom9n08q.apps.googleusercontent.com",
-  recaptchaSiteKey: ""
-};
-
-// server.ts
+var firebaseConfig = {};
+try {
+  const configPath = import_path.default.join(process.cwd(), "firebase-applet-config.json");
+  if (import_fs.default.existsSync(configPath)) {
+    firebaseConfig = JSON.parse(import_fs.default.readFileSync(configPath, "utf-8"));
+  }
+} catch (e) {
+  console.warn("Failed to read firebase-applet-config.json:", e);
+}
 var app = (0, import_express.default)();
 var PORT = 3e3;
 app.use(import_express.default.json());
-var firebaseApp = !(0, import_app.getApps)().length ? (0, import_app.initializeApp)(firebase_applet_config_default) : (0, import_app.getApp)();
-var dbId = firebase_applet_config_default.firestoreDatabaseId && firebase_applet_config_default.firestoreDatabaseId !== "(default)" ? firebase_applet_config_default.firestoreDatabaseId : void 0;
+var firebaseApp = !(0, import_app.getApps)().length ? (0, import_app.initializeApp)(firebaseConfig) : (0, import_app.getApp)();
+var dbId = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== "(default)" ? firebaseConfig.firestoreDatabaseId : void 0;
 var db = (0, import_firestore.getFirestore)(firebaseApp, dbId);
 function extractDomain(urlStr) {
   if (!urlStr) return "";
