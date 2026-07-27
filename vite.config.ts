@@ -5,8 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(({command}) => {
   const isBuild = command === 'build';
-  const repoName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : null;
-  const base = isBuild ? (repoName ? `/${repoName}/` : './') : '/';
+  // Use relative base path ('./') for production builds so assets resolve seamlessly on
+  // GitHub Pages subpaths (e.g. /madmoon-0.1/), custom domains (e.g. madmoon.bventures.me), and Cloud Run.
+  const base = isBuild ? (process.env.VITE_BASE_URL || './') : '/';
 
   return {
     base,
