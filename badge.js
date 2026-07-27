@@ -35,10 +35,16 @@
   const lang = currentScript.getAttribute('data-lang') || 'ar';
   const size = currentScript.getAttribute('data-size') || 'normal';
 
-  // Construct target verification URL
-  const baseUrl = window.location.origin.includes('localhost') || window.location.origin.includes('run.app')
-    ? window.location.origin
-    : 'https://madmoon.jo';
+  // Construct target verification URL dynamically from script source location
+  let baseUrl = window.location.origin;
+  if (currentScript.src) {
+    try {
+      const urlObj = new URL(currentScript.src, window.location.href);
+      baseUrl = urlObj.origin + urlObj.pathname.substring(0, urlObj.pathname.lastIndexOf('/'));
+    } catch (e) {
+      baseUrl = window.location.origin;
+    }
+  }
   const verifyUrl = `${baseUrl}/?verify=${encodeURIComponent(storeSlug)}#verify`;
 
   // Query Backend Merchant Status API
