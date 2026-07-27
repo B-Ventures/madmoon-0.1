@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldCheck, Heart } from 'lucide-react';
 import { Language, ViewTab } from '../types';
 import { translations } from '../translations';
+import { MadmoonLogo } from './MadmoonLogo';
 
 interface FooterProps {
   lang: Language;
@@ -19,8 +20,8 @@ export const Footer: React.FC<FooterProps> = ({ lang, setActiveTab }) => {
           
           {/* Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-800 text-white flex items-center justify-center shadow-2xs">
-              <ShieldCheck className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 p-1.5 shadow-2xs flex items-center justify-center">
+              <MadmoonLogo className="w-full h-full" variant="colored-light" />
             </div>
             <div>
               <span className="text-xl font-black text-slate-900">
@@ -39,9 +40,6 @@ export const Footer: React.FC<FooterProps> = ({ lang, setActiveTab }) => {
             </button>
             <button onClick={() => setActiveTab('register')} className="hover:text-emerald-800 transition-colors">
               {t.navRegister}
-            </button>
-            <button onClick={() => setActiveTab('generator')} className="hover:text-emerald-800 transition-colors">
-              {t.navGenerator}
             </button>
             <button onClick={() => setActiveTab('directory')} className="hover:text-emerald-800 transition-colors">
               {t.navDirectory}

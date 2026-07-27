@@ -31,6 +31,7 @@ export interface MerchantStore {
   websiteUrl: string;
   phone: string;
   commercialReg: string; // رقم السجل التجاري / الرقم الوطني
+  sellerType?: 'individual' | 'business';
   taxNumber?: string; // الرقم الضريبي
   category: StoreCategory;
   country: CountryCode;
@@ -63,4 +64,4 @@ export interface DisputeReport {
   status: 'pending' | 'reviewing' | 'resolved';
 }
 
-export type ViewTab = 'home' | 'register' | 'generator' | 'directory' | 'verify' | 'about' | 'admin';
+export type ViewTab = 'home' | 'register' | 'directory' | 'verify' | 'about' | 'admin';

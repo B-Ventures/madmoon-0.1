@@ -2,6 +2,8 @@ import React from 'react';
 import { ShieldCheck, CheckCircle2, TrendingUp, Users, ExternalLink, Award, ArrowLeft, ArrowRight, Lock, Building2 } from 'lucide-react';
 import { Language, MerchantStore } from '../types';
 import { translations } from '../translations';
+import { MadmoonLogo } from './MadmoonLogo';
+import { getStoreLayerInfo } from '../utils/layerUtils';
 
 interface HeroSectionProps {
   lang: Language;
@@ -34,7 +36,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="lg:col-span-7 text-right">
             
             <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-900 px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-2xs mb-6">
-              <ShieldCheck className="w-4 h-4 text-emerald-700" />
+              <MadmoonLogo className="w-4 h-4" variant="colored-light" />
               <span>{t.heroBadge}</span>
             </div>
 
@@ -53,7 +55,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 onClick={onRegisterClick}
                 className="bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold text-base px-7 py-3.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2.5"
               >
-                <ShieldCheck className="w-5 h-5" />
+                <MadmoonLogo className="w-5 h-5" variant="white" />
                 <span>{t.heroCtaPrimary}</span>
               </button>
 
@@ -117,8 +119,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     onClick={() => onSelectStoreToVerify('amman-artisans')}
                     className="cursor-pointer bg-slate-950/90 border border-emerald-500/40 hover:border-emerald-400 text-white px-4 py-2.5 rounded-full shadow-lg flex items-center gap-3 transition-transform hover:scale-105"
                   >
-                    <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                      <ShieldCheck className="w-4 h-4" />
+                    <div className="w-7 h-7 rounded-full bg-slate-900 border border-emerald-500/40 flex items-center justify-center p-1.5 shrink-0">
+                      <MadmoonLogo className="w-full h-full" variant="white" />
                     </div>
                     <div className="text-right">
                       <div className="text-[10px] text-emerald-400 font-extrabold flex items-center gap-1">
@@ -161,8 +163,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80">
-              <div className="flex items-center justify-center text-emerald-700 mb-1.5">
-                <ShieldCheck className="w-5 h-5" />
+              <div className="flex items-center justify-center mb-1.5">
+                <MadmoonLogo className="w-5 h-5" variant="colored-light" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-slate-900 font-numeric">
                 1,248+
@@ -232,54 +234,64 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {sampleStores.map((store) => (
-              <div
-                key={store.id}
-                onClick={() => onSelectStoreToVerify(store.slug)}
-                className="group bg-white border border-slate-200 hover:border-emerald-600 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-md flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
-                        {store.logoUrl ? (
-                          <img src={store.logoUrl} alt={store.nameAr} className="w-full h-full object-cover" />
-                        ) : (
-                          <Building2 className="w-5 h-5 text-slate-500" />
-                        )}
+            {sampleStores.map((store) => {
+              const layerInfo = getStoreLayerInfo(store);
+              return (
+                <div
+                  key={store.id}
+                  onClick={() => onSelectStoreToVerify(store.slug)}
+                  className="group bg-white border border-slate-200 hover:border-emerald-600 rounded-2xl p-4 transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-md flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
+                          {store.logoUrl ? (
+                            <img src={store.logoUrl} alt={store.nameAr} className="w-full h-full object-cover" />
+                          ) : (
+                            <Building2 className="w-5 h-5 text-slate-500" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-black text-slate-900 group-hover:text-emerald-800 transition-colors">
+                            {lang === 'ar' ? store.nameAr : store.nameEn}
+                          </h3>
+                          <p className="text-xs text-slate-500 font-mono">
+                            {store.websiteUrl.replace('https://', '')}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-sm font-black text-slate-900 group-hover:text-emerald-800 transition-colors">
-                          {lang === 'ar' ? store.nameAr : store.nameEn}
-                        </h3>
-                        <p className="text-xs text-slate-500 font-mono">
-                          {store.websiteUrl.replace('https://', '')}
-                        </p>
-                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs py-2 px-2.5 bg-slate-50/80 rounded-lg border border-slate-100">
+                      <span className="text-slate-600 font-medium">
+                        {lang === 'ar' ? 'السجل التجاري' : 'Commercial Reg'}
+                      </span>
+                      <span className="font-mono text-slate-900 font-extrabold">
+                        {store.commercialReg}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs py-2 px-2.5 bg-slate-50/80 rounded-lg border border-slate-100">
-                    <span className="text-slate-600 font-medium">
-                      {lang === 'ar' ? 'السجل التجاري' : 'Commercial Reg'}
-                    </span>
-                    <span className="font-mono text-slate-900 font-extrabold">
-                      {store.commercialReg}
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <div 
+                      className="inline-flex items-center gap-1.5 font-black px-2.5 py-1 rounded-full border text-[11px]"
+                      style={{
+                        backgroundColor: `${layerInfo.colorHex}12`,
+                        borderColor: `${layerInfo.colorHex}35`,
+                        color: layerInfo.colorHex
+                      }}
+                    >
+                      <MadmoonLogo className="w-3.5 h-3.5 shrink-0" variant={layerInfo.variant} />
+                      <span>L{layerInfo.layer}</span>
+                    </div>
+                    <span className="text-slate-500 text-[11px] font-semibold">
+                      {store.clickCount.toLocaleString()} {lang === 'ar' ? 'نقرة' : 'clicks'}
                     </span>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <div className="inline-flex items-center gap-1 text-emerald-800 font-extrabold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{lang === 'ar' ? 'مضمون' : 'Verified'}</span>
-                  </div>
-                  <span className="text-slate-500 text-[11px] font-semibold">
-                    {store.clickCount.toLocaleString()} {lang === 'ar' ? 'نقرة' : 'clicks'}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

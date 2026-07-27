@@ -3,6 +3,8 @@ import { Search, Filter, ShieldCheck, ExternalLink, Building2, CheckCircle2, Glo
 import { Language, MerchantStore, CountryCode, StoreCategory } from '../types';
 import { translations } from '../translations';
 import { COUNTRIES } from '../data/countries';
+import { MadmoonLogo } from './MadmoonLogo';
+import { getStoreLayerInfo } from '../utils/layerUtils';
 
 interface StoreRegistryDirectoryProps {
   lang: Language;
@@ -24,6 +26,8 @@ export const StoreRegistryDirectory: React.FC<StoreRegistryDirectoryProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
   const filteredStores = stores.filter((store) => {
+    const isVerified = store.verificationStatus === 'active' || (!store.verificationStatus && store.domainVerified);
+
     const matchesSearch =
       store.nameAr.toLowerCase().includes(searchTerm.toLowerCase()) ||
       store.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,7 +37,7 @@ export const StoreRegistryDirectory: React.FC<StoreRegistryDirectoryProps> = ({
     const matchesCountry = selectedCountry === 'ALL' || store.country === selectedCountry;
     const matchesCategory = selectedCategory === 'ALL' || store.category === selectedCategory;
 
-    return matchesSearch && matchesCountry && matchesCategory;
+    return isVerified && matchesSearch && matchesCountry && matchesCategory;
   });
 
   return (
@@ -42,7 +46,7 @@ export const StoreRegistryDirectory: React.FC<StoreRegistryDirectoryProps> = ({
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-900 px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-2xs">
-          <ShieldCheck className="w-4 h-4 text-emerald-700" />
+          <MadmoonLogo className="w-4 h-4" variant="colored-light" />
           <span>{lang === 'ar' ? 'السجل العام المفتوح' : 'Public Open Registry'}</span>
         </div>
         <h2 className="text-3xl sm:text-4xl font-black text-slate-900">
@@ -126,6 +130,7 @@ export const StoreRegistryDirectory: React.FC<StoreRegistryDirectoryProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredStores.map((store) => {
             const countryData = COUNTRIES[store.country] || COUNTRIES['JO'];
+            const layerInfo = getStoreLayerInfo(store);
             return (
               <div
                 key={store.id}
@@ -134,7 +139,7 @@ export const StoreRegistryDirectory: React.FC<StoreRegistryDirectoryProps> = ({
                 <div>
                   
                   {/* Top Bar */}
-                  <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 p-0.5 overflow-hidden flex items-center justify-center shrink-0">
                         {store.logoUrl ? (
@@ -158,11 +163,30 @@ export const StoreRegistryDirectory: React.FC<StoreRegistryDirectoryProps> = ({
                     </span>
                   </div>
 
+                  {/* Layer Badge Tag */}
+                  <div className="mb-4">
+                    <span 
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold border shadow-2xs"
+                      style={{
+                        backgroundColor: `${layerInfo.colorHex}10`,
+                        borderColor: `${layerInfo.colorHex}30`,
+                        color: layerInfo.colorHex
+                      }}
+                    >
+                      <MadmoonLogo className="w-3.5 h-3.5 shrink-0" variant={layerInfo.variant} />
+                      <span>{lang === 'ar' ? layerInfo.nameAr : layerInfo.nameEn}</span>
+                    </span>
+                  </div>
+
                   {/* Badges / Details */}
                   <div className="space-y-2 mb-4">
                     <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
-                      <span className="text-slate-600 font-medium">{lang === 'ar' ? 'السجل التجاري' : 'Commercial Reg'}</span>
-                      <span className="font-mono text-slate-900 font-extrabold">{store.commercialReg}</span>
+                      <span className="text-slate-600 font-medium">{lang === 'ar' ? 'السجل التجاري' : 'Commercial Reg.'}</span>
+                      <span className="font-mono text-slate-900 font-extrabold">
+                        {store.sellerType === 'individual' || (store.commercialReg && (store.commercialReg.includes('فردي') || store.commercialReg.includes('Individual')))
+                          ? (lang === 'ar' ? 'فردي / صانع محتوى (معفى)' : 'Individual / Content Creator')
+                          : store.commercialReg}
+                      </span>
                     </div>
 
                     <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between text-xs">

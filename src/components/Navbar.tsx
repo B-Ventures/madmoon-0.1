@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Globe, Store, PlusCircle, Search, HelpCircle, Lock, Menu, X, Code2, ArrowUpRight } from 'lucide-react';
 import { Language, ViewTab } from '../types';
 import { translations } from '../translations';
+import { MadmoonLogo } from './MadmoonLogo';
 
 interface NavbarProps {
   lang: Language;
@@ -37,8 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleTabSelect('home')}
             className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none text-right shrink-0"
           >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-800 p-0.5 shadow-sm group-hover:bg-emerald-900 transition-colors flex items-center justify-center text-white shrink-0">
-              <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white border border-slate-200/90 p-1.5 shadow-2xs group-hover:border-emerald-500 transition-all flex items-center justify-center shrink-0">
+              <MadmoonLogo className="w-full h-full" variant="colored-light" />
             </div>
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -78,19 +79,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <button
-              id="nav-generator-btn"
-              onClick={() => handleTabSelect('generator')}
-              className={`px-3 py-1.5 lg:px-3.5 lg:py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-                activeTab === 'generator'
-                  ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              <span>{t.navGenerator}</span>
-            </button>
-
-            <button
               id="nav-directory-btn"
               onClick={() => handleTabSelect('directory')}
               className={`px-3 py-1.5 lg:px-3.5 lg:py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
@@ -101,22 +89,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Search className="w-3.5 h-3.5" />
               <span>{t.navDirectory}</span>
-              <span className="bg-slate-200 text-slate-800 text-[10px] px-1.5 py-0.2 rounded-md font-bold font-mono">
-                {totalStoresCount}
-              </span>
-            </button>
-
-            <button
-              id="nav-admin-btn"
-              onClick={() => handleTabSelect('admin')}
-              className={`px-3 py-1.5 lg:px-3.5 lg:py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-                activeTab === 'admin'
-                  ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{t.navAdmin}</span>
             </button>
           </nav>
 
@@ -179,18 +151,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center gap-2">
                 <PlusCircle className="w-4 h-4" />
                 <span>{t.navRegister}</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => handleTabSelect('generator')}
-              className={`w-full text-right rtl:text-right ltr:text-left px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center justify-between ${
-                activeTab === 'generator' ? 'bg-emerald-50 text-emerald-800 font-black' : 'text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Code2 className="w-4 h-4" />
-                <span>{t.navGenerator}</span>
               </div>
             </button>
 

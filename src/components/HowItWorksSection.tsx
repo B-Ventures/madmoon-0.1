@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldCheck, FileCheck2, Code2, Users, CheckCircle2, Lock, Sparkles, Building2 } from 'lucide-react';
 import { Language } from '../types';
 import { translations } from '../translations';
+import { MadmoonLogo } from './MadmoonLogo';
 
 interface HowItWorksSectionProps {
   lang: Language;
@@ -74,7 +75,7 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center font-black text-lg">
               3
             </div>
-            <ShieldCheck className="w-6 h-6 text-emerald-700" />
+            <MadmoonLogo className="w-6 h-6" variant="colored-light" />
           </div>
           <h3 className="text-lg font-black text-slate-900">
             {lang === 'ar' ? 'ارتفاع ثقة المشتري والمبيعات' : '3. Instant Buyer Confidence & Conversion'}

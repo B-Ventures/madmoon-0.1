@@ -9,7 +9,6 @@ import { INITIAL_STORES } from './data/initialStores';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { RegistrationForm } from './components/RegistrationForm';
-import { BadgeGenerator } from './components/BadgeGenerator';
 import { StoreVerificationCertificate } from './components/StoreVerificationCertificate';
 import { ReportDisputeModal } from './components/ReportDisputeModal';
 import { StoreRegistryDirectory } from './components/StoreRegistryDirectory';
@@ -189,7 +188,6 @@ export default function App() {
   const handleStoreRegistered = (newStore: MerchantStore) => {
     setStores((prev) => [newStore, ...prev]);
     setSelectedStoreSlug(newStore.slug);
-    setActiveTab('generator');
   };
 
   // Handle store update (e.g. click count increment)
@@ -229,6 +227,11 @@ export default function App() {
     localStorage.removeItem('madmoon_admin_logged');
     setActiveTab('home');
   };
+
+  // Active verified stores only for public showcase
+  const activeVerifiedStores = stores.filter(
+    (s) => s.verificationStatus === 'active' || (!s.verificationStatus && s.domainVerified)
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col justify-between selection:bg-emerald-500 selection:text-white pb-20 sm:pb-0">
@@ -278,7 +281,7 @@ export default function App() {
               lang={lang}
               onRegisterClick={() => setActiveTab('register')}
               onDirectoryClick={() => setActiveTab('directory')}
-              sampleStores={stores.slice(0, 4)}
+              sampleStores={activeVerifiedStores.slice(0, 4)}
               onSelectStoreToVerify={handleOpenCertificate}
               totalClickCount={totalClickCount}
             />
@@ -292,16 +295,9 @@ export default function App() {
         {activeTab === 'register' && (
           <RegistrationForm
             lang={lang}
+            existingStores={stores}
             onStoreRegistered={handleStoreRegistered}
-          />
-        )}
-
-        {activeTab === 'generator' && (
-          <BadgeGenerator
-            lang={lang}
-            store={activeStore}
             onOpenCertificate={handleOpenCertificate}
-            onStoreUpdated={handleStoreUpdated}
           />
         )}
 
@@ -384,18 +380,6 @@ export default function App() {
         >
           <PlusCircle className="w-5 h-5" />
           <span className="text-[10px] mt-0.5">{lang === 'ar' ? 'تسجيل متجر' : 'Register'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('generator')}
-          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-2 py-1 rounded-xl transition-all ${
-            activeTab === 'generator'
-              ? 'text-emerald-800 font-extrabold bg-emerald-50'
-              : 'text-slate-500 hover:text-slate-800 font-medium'
-          }`}
-        >
-          <Code2 className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">{lang === 'ar' ? 'كود الشارة' : 'Badge'}</span>
         </button>
 
         <button

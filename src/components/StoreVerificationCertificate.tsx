@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2, ExternalLink, AlertTriangle, Share2, Building2, Globe, Phone, FileText, Calendar, Eye, Lock, ArrowLeft, ArrowRight, Check, Flag } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, ExternalLink, AlertTriangle, Share2, Building2, Globe, Phone, FileText, Calendar, Eye, Lock, ArrowLeft, ArrowRight, Check, Flag, Clock, XCircle } from 'lucide-react';
 import { Language, MerchantStore } from '../types';
 import { translations } from '../translations';
 import { COUNTRIES } from '../data/countries';
+import { MadmoonLogo } from './MadmoonLogo';
+import { getStoreLayerInfo } from '../utils/layerUtils';
 
 interface StoreVerificationCertificateProps {
   lang: Language;
@@ -28,6 +30,13 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
     setTimeout(() => setCopiedShare(false), 2000);
   };
 
+  const isApproved = store.verificationStatus === 'active' || (!store.verificationStatus && store.domainVerified);
+  const isPending = store.verificationStatus === 'pending';
+  const isRejected = store.verificationStatus === 'rejected';
+
+  const isBusiness = store.sellerType === 'business' || (store.crVerified && store.commercialReg && !store.commercialReg.includes('فردي') && !store.commercialReg.includes('Individual'));
+  const layerInfo = getStoreLayerInfo(store);
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
       
@@ -35,7 +44,7 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
       <div className="flex items-center justify-between">
         <button
           onClick={onBackToHome}
-          className="text-slate-600 hover:text-slate-900 text-xs font-bold flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-slate-200 transition-colors shadow-2xs"
+          className="text-slate-600 hover:text-slate-900 text-xs font-bold flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-slate-200 transition-colors shadow-2xs cursor-pointer"
         >
           {lang === 'ar' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
           <span>{lang === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}</span>
@@ -46,12 +55,45 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
         </span>
       </div>
 
+      {/* Pending / Rejected Notice Banner if store is not approved */}
+      {isPending && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 flex items-start gap-3.5 shadow-sm">
+          <Clock className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="font-black text-amber-950 text-sm">
+              {lang === 'ar' ? '⚠️ طلب التوثيق قيد المراجعة والتحقق' : '⚠️ Verification Pending Review'}
+            </h3>
+            <p className="text-xs font-semibold text-amber-900 leading-relaxed">
+              {lang === 'ar'
+                ? 'هذا المتجر قام بتقديم طلب التوثيق حديثاً وهو حالياً قيد تدقيق ومراجعة السجلات والبيانات من قِبل إدارة منصة مضمون. لم يتم منح ختم الاعتماد النهائي بعد.'
+                : 'This merchant submitted a verification request and is currently under administrative review. Official badge approval has NOT been issued yet.'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isRejected && (
+        <div className="bg-rose-50 border-2 border-rose-300 rounded-2xl p-5 flex items-start gap-3.5 shadow-sm">
+          <XCircle className="w-6 h-6 text-rose-700 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="font-black text-rose-950 text-sm">
+              {lang === 'ar' ? '❌ طلب التوثيق مرفوض / موقوف' : '❌ Verification Rejected or Suspended'}
+            </h3>
+            <p className="text-xs font-semibold text-rose-900 leading-relaxed">
+              {lang === 'ar'
+                ? 'تم رفض طلب التوثيق أو إيقاف اعتماد هذا المتجر لعدم مطابقة معايير الامتثال والسجلات الحكومية المعتمدة.'
+                : 'Verification for this merchant has been rejected or suspended due to non-compliance with commercial standards.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* OFFICIAL DIGITAL CERTIFICATE DOCUMENT */}
       <div className="bg-white border-2 border-slate-300 rounded-3xl p-8 sm:p-14 shadow-md relative overflow-hidden">
         
         {/* Subtle Watermark Seal Pattern in Center Background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
-          <ShieldCheck className="w-96 h-96 text-slate-900" />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04]">
+          <MadmoonLogo className="w-96 h-96" variant={layerInfo.variant} />
         </div>
 
         {/* Certificate Golden/Emerald Fine Double Frame */}
@@ -61,25 +103,52 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
           <div className="text-center space-y-4 pb-8 border-b border-slate-200">
             <div className="flex items-center justify-between gap-4">
               <div className="text-right">
-                <span className="text-[10px] font-black uppercase text-emerald-800 tracking-wider">
+                <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider">
                   {lang === 'ar' ? 'السجل العام التجاري' : 'PUBLIC TRUST REGISTRY'}
                 </span>
                 <p className="text-xs font-bold text-slate-500 font-mono">MADMOON-JO-AUTH</p>
               </div>
 
               {/* Official Seal Stamp Icon */}
-              <div className="w-16 h-16 rounded-full bg-emerald-800 text-white flex flex-col items-center justify-center p-2 shadow-sm border-2 border-emerald-900 shrink-0">
-                <ShieldCheck className="w-6 h-6 text-emerald-300" />
-                <span className="text-[8px] font-black tracking-tighter uppercase mt-0.5">VERIFIED</span>
-              </div>
+              {isApproved && (
+                <div 
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${layerInfo.badgeBgClass} ${layerInfo.badgeBorderClass} border-2 flex items-center justify-center p-2.5 shadow-xs shrink-0`}
+                  title={lang === 'ar' ? layerInfo.nameAr : layerInfo.nameEn}
+                  id="certificate-layer-logo-stamp"
+                >
+                  <MadmoonLogo className="w-full h-full" variant={layerInfo.variant} />
+                </div>
+              )}
+              {isPending && (
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-50 border-2 border-amber-300 flex items-center justify-center p-2.5 shadow-xs shrink-0">
+                  <Clock className="w-7 h-7 text-amber-700" />
+                </div>
+              )}
+              {isRejected && (
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-rose-50 border-2 border-rose-300 flex items-center justify-center p-2.5 shadow-xs shrink-0">
+                  <XCircle className="w-7 h-7 text-rose-700" />
+                </div>
+              )}
 
               <div className="text-left">
                 <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
                   {lang === 'ar' ? 'حالة الاعتماد' : 'STATUS'}
                 </span>
-                <p className="text-xs font-extrabold text-emerald-800">
-                  ✓ {lang === 'ar' ? 'موثق ومعتمد' : 'OFFICIALLY VERIFIED'}
-                </p>
+                {isApproved && (
+                  <p className="text-xs font-extrabold text-[#047857]">
+                    ✓ {lang === 'ar' ? 'موثق ومعتمد' : 'OFFICIALLY VERIFIED'}
+                  </p>
+                )}
+                {isPending && (
+                  <p className="text-xs font-extrabold text-amber-800">
+                    ⏳ {lang === 'ar' ? 'قيد التحقق' : 'PENDING REVIEW'}
+                  </p>
+                )}
+                {isRejected && (
+                  <p className="text-xs font-extrabold text-rose-800">
+                    ✕ {lang === 'ar' ? 'مرفوض' : 'REJECTED'}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -108,35 +177,78 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
               <h2 className="text-2xl font-black text-slate-900">
                 {lang === 'ar' ? store.nameAr : store.nameEn}
               </h2>
-              <p className="text-xs font-mono font-bold text-emerald-800 mt-0.5 dir-ltr">
+              <p className="text-xs font-mono font-bold text-slate-600 mt-0.5 dir-ltr">
                 {store.websiteUrl}
               </p>
+
+              {/* Madmoon Assigned Layer Badge */}
+              <div 
+                className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-black shadow-2xs"
+                style={{
+                  backgroundColor: `${layerInfo.colorHex}12`,
+                  borderColor: `${layerInfo.colorHex}40`,
+                  color: layerInfo.colorHex
+                }}
+              >
+                <MadmoonLogo className="w-4 h-4 shrink-0" variant={layerInfo.variant} />
+                <span>
+                  {layerInfo.layer === 1
+                    ? (lang === 'ar' ? 'مستوى 1 - هوية شخصية مؤكدة' : 'Layer 1 - Personal ID Identity')
+                    : layerInfo.layer === 2
+                    ? (lang === 'ar' ? 'مستوى 2 - منشأة مسجلة' : 'Layer 2 - Commercial Registry')
+                    : (lang === 'ar' ? layerInfo.nameAr : layerInfo.nameEn)}
+                </span>
+              </div>
             </div>
 
             <p className="text-xs text-slate-600 font-medium max-w-lg mx-auto leading-relaxed pt-1">
-              {lang === 'ar'
-                ? 'تشهد منصة مضمون المعتمدة لمراقبة التجارة الإلكترونية بأن المنشأة المبينة أعلاه موثقة وفق السجل التجاري الرسمي ورقم الهاتف والنطاق الإلكتروني.'
-                : 'Madmoon Verification Registry hereby certifies that the e-commerce establishment above is validated against official Commercial Registry records, active domain, and verified hotline.'}
+              {isPending ? (
+                lang === 'ar'
+                  ? 'هذا المتجر تحت المراجعة والتدقيق حالياً من قِبل إدارة المنصة. لم يتم تفعيل شهادة الاعتماد بشكل نهائي.'
+                  : 'This merchant is currently under administrative review. The official certificate is not yet activated.'
+              ) : isRejected ? (
+                lang === 'ar'
+                  ? 'طلب التوثيق لهذا المتجر غير مقبول أو تم إيقافه لعدم استيفاء الشروط.'
+                  : 'Verification for this merchant is rejected or suspended due to non-compliance.'
+              ) : isBusiness ? (
+                lang === 'ar'
+                  ? 'تشهد منصة مضمون المعتمدة لمراقبة التجارة الإلكترونية بأن المنشأة المبينة أعلاه موثقة وفق السجل التجاري الرسمي ورقم الهاتف والنطاق الإلكتروني.'
+                  : 'Madmoon Verification Registry hereby certifies that the e-commerce establishment above is validated against official Commercial Registry records, active domain, and verified hotline.'
+              ) : (
+                lang === 'ar'
+                  ? 'تشهد منصة مضمون المعتمدة لمراقبة التجارة الإلكترونية بأن متجر الفرد المبين أعلاه مؤكد الهوية والتواصل وفق النطاق الإلكتروني ورقم الواتساب المعتمد.'
+                  : 'Madmoon Verification Registry hereby certifies that the individual seller account above is verified for contact identity via active domain and verified WhatsApp.'
+              )}
             </p>
           </div>
 
           {/* VERIFICATION DETAILS TABLE GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
             
-            {/* Field 1: CR Number */}
+            {/* Field 1: CR Number / Seller Identity */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
               <div className="p-2.5 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 shrink-0">
                 <FileText className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-[11px] font-bold text-slate-500 block">
-                  {lang === 'ar' ? 'السجل التجاري / الرقم الوطني' : 'Commercial Reg. / ID'}
+                  {lang === 'ar' ? 'السجل التجاري / صفة المتجر' : 'Commercial Reg. / Identity Status'}
                 </span>
                 <span className="text-sm font-black font-mono text-slate-900 block mt-0.5">
-                  {store.commercialReg}
+                  {isBusiness
+                    ? store.commercialReg
+                    : (lang === 'ar' ? 'فردي / صانع محتوى (معفى)' : 'Individual / Content Creator (Exempt)')}
                 </span>
                 <span className="text-[10px] font-extrabold text-emerald-800 mt-1 block">
-                  ✓ {lang === 'ar' ? `مطابق وموثق رسمياً (${countryInfo.flag} ${countryInfo.nameAr})` : `Officially Matched (${countryInfo.nameEn})`}
+                  {isBusiness ? (
+                    lang === 'ar'
+                      ? `✓ مطابق وموثق رسمياً مع السجلات الحكومية (${countryInfo.flag} ${countryInfo.nameAr})`
+                      : `✓ Officially matched with government records (${countryInfo.nameEn})`
+                  ) : (
+                    lang === 'ar'
+                      ? `✓ متجر فردي - هوية تواصل مؤكدة (معفى من التسجيل التجاري)`
+                      : `✓ Individual Store - Verified Contact Identity (Exempt from CR)`
+                  )}
                 </span>
               </div>
             </div>

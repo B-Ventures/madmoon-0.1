@@ -5,6 +5,9 @@ import {
   createUserWithEmailAndPassword,
   signOut, 
   onAuthStateChanged,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult,
   User 
 } from 'firebase/auth';
 import { 
@@ -151,6 +154,7 @@ export async function updateMerchantStatusInFirestore(
     const storeRef = doc(db, 'merchants', storeId);
     const updateData: Partial<MerchantStore> = {
       verificationStatus: status,
+      domainVerified: status === 'active',
       ...(tier ? { tier } : {}),
       ...(status === 'active' ? { verifiedAt: new Date().toISOString().split('T')[0] } : {})
     };
@@ -205,5 +209,7 @@ export {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
 };
