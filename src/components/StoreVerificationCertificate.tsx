@@ -183,20 +183,40 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
 
               {/* Madmoon Assigned Layer Badge */}
               <div 
-                className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-black shadow-2xs"
-                style={{
-                  backgroundColor: `${layerInfo.colorHex}12`,
-                  borderColor: `${layerInfo.colorHex}40`,
-                  color: layerInfo.colorHex
-                }}
+                className={`mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-black shadow-2xs ${
+                  isRejected
+                    ? 'bg-rose-50 border-rose-300 text-rose-800'
+                    : isPending
+                    ? 'bg-amber-50 border-amber-300 text-amber-800'
+                    : ''
+                }`}
+                style={
+                  isApproved
+                    ? {
+                        backgroundColor: `${layerInfo.colorHex}12`,
+                        borderColor: `${layerInfo.colorHex}40`,
+                        color: layerInfo.colorHex
+                      }
+                    : undefined
+                }
               >
-                <MadmoonLogo className="w-4 h-4 shrink-0" variant={layerInfo.variant} />
+                {isRejected ? (
+                  <XCircle className="w-4 h-4 shrink-0 text-rose-700" />
+                ) : isPending ? (
+                  <Clock className="w-4 h-4 shrink-0 text-amber-700" />
+                ) : (
+                  <MadmoonLogo className="w-4 h-4 shrink-0" variant={layerInfo.variant} />
+                )}
                 <span>
-                  {layerInfo.layer === 1
-                    ? (lang === 'ar' ? 'مستوى 1 - هوية شخصية مؤكدة' : 'Layer 1 - Personal ID Identity')
-                    : layerInfo.layer === 2
-                    ? (lang === 'ar' ? 'مستوى 2 - منشأة مسجلة' : 'Layer 2 - Commercial Registry')
-                    : (lang === 'ar' ? layerInfo.nameAr : layerInfo.nameEn)}
+                  {isRejected
+                    ? (lang === 'ar' ? 'طلب التوثيق مرفوض / غير معتمد' : 'Verification Rejected / Suspended')
+                    : isPending
+                    ? (lang === 'ar' ? 'طلب قيد المراجعة والتدقيق' : 'Verification Pending Review')
+                    : (layerInfo.layer === 1
+                      ? (lang === 'ar' ? 'مستوى 1 - هوية شخصية مؤكدة' : 'Layer 1 - Personal ID Identity')
+                      : layerInfo.layer === 2
+                      ? (lang === 'ar' ? 'مستوى 2 - منشأة مسجلة' : 'Layer 2 - Commercial Registry')
+                      : (lang === 'ar' ? layerInfo.nameAr : layerInfo.nameEn))}
                 </span>
               </div>
             </div>
@@ -227,7 +247,13 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
             
             {/* Field 1: CR Number / Seller Identity */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
-              <div className="p-2.5 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 shrink-0">
+              <div className={`p-2.5 rounded-lg border shrink-0 ${
+                isRejected
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : isPending
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
                 <FileText className="w-5 h-5" />
               </div>
               <div>
@@ -239,15 +265,27 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
                     ? store.commercialReg
                     : (lang === 'ar' ? 'فردي / صانع محتوى (معفى)' : 'Individual / Content Creator (Exempt)')}
                 </span>
-                <span className="text-[10px] font-extrabold text-emerald-800 mt-1 block">
-                  {isBusiness ? (
-                    lang === 'ar'
-                      ? `✓ مطابق وموثق رسمياً مع السجلات الحكومية (${countryInfo.flag} ${countryInfo.nameAr})`
-                      : `✓ Officially matched with government records (${countryInfo.nameEn})`
+                <span className="text-[10px] font-extrabold mt-1 block">
+                  {isRejected ? (
+                    <span className="text-rose-800">
+                      ✕ {lang === 'ar' ? 'غير مطابق / تم رفض الاعتماد التجاري' : 'Unmatched / Commercial Verification Rejected'}
+                    </span>
+                  ) : isPending ? (
+                    <span className="text-amber-800">
+                      ⏳ {lang === 'ar' ? 'جاري التحقق من بيانات السجل التجاري' : 'Commercial Registry Check Pending'}
+                    </span>
+                  ) : isBusiness ? (
+                    <span className="text-emerald-800">
+                      ✓ {lang === 'ar'
+                        ? `مطابق وموثق رسمياً مع السجلات الحكومية (${countryInfo.flag} ${countryInfo.nameAr})`
+                        : `Officially matched with government records (${countryInfo.nameEn})`}
+                    </span>
                   ) : (
-                    lang === 'ar'
-                      ? `✓ متجر فردي - هوية تواصل مؤكدة (معفى من التسجيل التجاري)`
-                      : `✓ Individual Store - Verified Contact Identity (Exempt from CR)`
+                    <span className="text-emerald-800">
+                      ✓ {lang === 'ar'
+                        ? `متجر فردي - هوية تواصل مؤكدة (معفى من التسجيل التجاري)`
+                        : `Individual Store - Verified Contact Identity (Exempt from CR)`}
+                    </span>
                   )}
                 </span>
               </div>
@@ -255,7 +293,13 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
 
             {/* Field 2: Domain */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
-              <div className="p-2.5 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 shrink-0">
+              <div className={`p-2.5 rounded-lg border shrink-0 ${
+                isRejected
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : isPending
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
                 <Globe className="w-5 h-5" />
               </div>
               <div>
@@ -265,15 +309,33 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
                 <span className="text-sm font-black font-mono text-slate-900 block mt-0.5 dir-ltr text-right">
                   {store.websiteUrl.replace('https://', '').replace('http://', '')}
                 </span>
-                <span className="text-[10px] font-extrabold text-emerald-800 mt-1 block">
-                  ✓ {lang === 'ar' ? 'نطاق مفعل ومحمي ببطاقة SSL' : 'Active Verified SSL Domain'}
+                <span className="text-[10px] font-extrabold mt-1 block">
+                  {isRejected ? (
+                    <span className="text-rose-800">
+                      ✕ {lang === 'ar' ? 'نطاق غير معتمد / تم تعليقه' : 'Domain Unapproved / Suspended'}
+                    </span>
+                  ) : isPending ? (
+                    <span className="text-amber-800">
+                      ⏳ {lang === 'ar' ? 'جاري فحص النطاق وربط DNS' : 'Domain & DNS Check Pending'}
+                    </span>
+                  ) : (
+                    <span className="text-emerald-800">
+                      ✓ {lang === 'ar' ? 'نطاق مفعل ومحمي ببطاقة SSL' : 'Active Verified SSL Domain'}
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
 
             {/* Field 3: Hotline */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
-              <div className="p-2.5 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 shrink-0">
+              <div className={`p-2.5 rounded-lg border shrink-0 ${
+                isRejected
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : isPending
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
                 <Phone className="w-5 h-5" />
               </div>
               <div>
@@ -283,26 +345,48 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
                 <span className="text-sm font-black font-mono text-slate-900 block mt-0.5 dir-ltr text-right">
                   {store.phone}
                 </span>
-                <span className="text-[10px] font-extrabold text-emerald-800 mt-1 block">
-                  ✓ {lang === 'ar' ? 'هاتف أعمال معتمد ومستجيب' : 'Verified Hotline Channel'}
+                <span className="text-[10px] font-extrabold mt-1 block">
+                  {isRejected ? (
+                    <span className="text-rose-800">
+                      ✕ {lang === 'ar' ? 'رقم التواصل غير معتمد / ملغى' : 'Hotline Unapproved / Rejected'}
+                    </span>
+                  ) : isPending ? (
+                    <span className="text-amber-800">
+                      ⏳ {lang === 'ar' ? 'جاري التحقق من رقم التوثيق' : 'Hotline Ownership Check Pending'}
+                    </span>
+                  ) : (
+                    <span className="text-emerald-800">
+                      ✓ {lang === 'ar' ? 'هاتف أعمال معتمد ومستجيب' : 'Verified Hotline Channel'}
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
 
             {/* Field 4: Issue Date */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
-              <div className="p-2.5 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 shrink-0">
+              <div className={`p-2.5 rounded-lg border shrink-0 ${
+                isRejected
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : isPending
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-[11px] font-bold text-slate-500 block">
-                  {lang === 'ar' ? 'تاريخ إصداره أول مرة' : 'Issue Date'}
+                  {isRejected
+                    ? (lang === 'ar' ? 'تاريخ رفض الطلب' : 'Rejection Date')
+                    : isPending
+                    ? (lang === 'ar' ? 'تاريخ تقديم الطلب' : 'Submission Date')
+                    : (lang === 'ar' ? 'تاريخ إصداره أول مرة' : 'Issue Date')}
                 </span>
                 <span className="text-sm font-black font-mono text-slate-900 block mt-0.5">
-                  {store.verifiedAt}
+                  {store.verifiedAt || new Date().toISOString().split('T')[0]}
                 </span>
                 <span className="text-[10px] font-bold text-slate-500 mt-1 block flex items-center gap-1">
-                  <Eye className="w-3 h-3 text-emerald-700" />
+                  <Eye className={`w-3 h-3 ${isRejected ? 'text-rose-700' : isPending ? 'text-amber-700' : 'text-emerald-700'}`} />
                   <span>{store.clickCount.toLocaleString()} {t.totalVerifications}</span>
                 </span>
               </div>
@@ -331,9 +415,21 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
             href={store.websiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
+            className={`w-full sm:w-auto font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm ${
+              isRejected
+                ? 'bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300'
+                : isPending
+                ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300'
+                : 'bg-emerald-800 hover:bg-emerald-900 text-white'
+            }`}
           >
-            <span>{t.visitStoreBtn}</span>
+            <span>
+              {isRejected
+                ? (lang === 'ar' ? 'الانتقال للمتجر (طلب غير معتمد)' : 'Visit Store (Unapproved)')
+                : isPending
+                ? (lang === 'ar' ? 'الانتقال للمتجر (قيد المراجعة)' : 'Visit Store (Pending Review)')
+                : t.visitStoreBtn}
+            </span>
             <ExternalLink className="w-4 h-4" />
           </a>
 

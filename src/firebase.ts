@@ -159,6 +159,8 @@ export async function updateMerchantStatusInFirestore(
     const updateData: Partial<MerchantStore> = {
       verificationStatus: status,
       domainVerified: status === 'active',
+      crVerified: status === 'active',
+      whatsappVerified: status === 'active',
       ...(tier ? { tier } : {}),
       ...(status === 'active' ? { verifiedAt: new Date().toISOString().split('T')[0] } : {})
     };

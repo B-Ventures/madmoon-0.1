@@ -169,7 +169,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       await updateMerchantStatusInFirestore(store.id, 'active', tier);
       showToast(lang === 'ar' ? `[ ✓ تم الاعتماد والتفعيل ] لمتجر "${store.nameAr}"` : `[ ✓ Approved & Activated ] "${store.nameEn}"`);
       if (selectedStore?.id === store.id) {
-        setSelectedStore({ ...selectedStore, verificationStatus: 'active', tier });
+        setSelectedStore({ 
+          ...selectedStore, 
+          verificationStatus: 'active', 
+          domainVerified: true,
+          crVerified: true,
+          whatsappVerified: true,
+          tier 
+        });
       }
     } catch (err) {
       console.error(err);
@@ -182,7 +189,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       await updateMerchantStatusInFirestore(storeId, 'rejected');
       showToast(lang === 'ar' ? `تم رفض طلب توثيق "${storeName}"` : `Verification rejected for "${storeName}"`);
       if (selectedStore?.id === storeId) {
-        setSelectedStore({ ...selectedStore, verificationStatus: 'rejected' });
+        setSelectedStore({ 
+          ...selectedStore, 
+          verificationStatus: 'rejected',
+          domainVerified: false,
+          crVerified: false,
+          whatsappVerified: false
+        });
       }
     } catch (err) {
       console.error(err);
