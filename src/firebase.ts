@@ -27,10 +27,14 @@ import defaultConfig from '../firebase-applet-config.json';
 import { MerchantStore, DisputeReport } from './types';
 import { INITIAL_STORES } from './data/initialStores';
 
+const getEnvOrConfig = (envVal: string | undefined, configVal: string) => {
+  return envVal && envVal.trim().length > 0 ? envVal.trim() : configVal;
+};
+
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || defaultConfig.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || defaultConfig.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || defaultConfig.projectId,
+  apiKey: getEnvOrConfig(import.meta.env.VITE_FIREBASE_API_KEY, defaultConfig.apiKey),
+  authDomain: getEnvOrConfig(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN, defaultConfig.authDomain),
+  projectId: getEnvOrConfig(import.meta.env.VITE_FIREBASE_PROJECT_ID, defaultConfig.projectId),
   appId: defaultConfig.appId,
   firestoreDatabaseId: defaultConfig.firestoreDatabaseId,
   storageBucket: defaultConfig.storageBucket,

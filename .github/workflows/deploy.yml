@@ -3,9 +3,16 @@ name: Deploy Madmoon Frontend to GitHub Pages
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
@@ -30,9 +37,26 @@ jobs:
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
 
-      - name: Deploy to GitHub Pages
+      - name: Ensure CNAME exists in dist
+        run: echo "madmoon.bventures.me" > dist/CNAME
+
+      # Option A: Deploy to gh-pages branch (for "Deploy from a branch" source)
+      - name: Deploy to gh-pages branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
           clean: true
+
+      # Option B: Upload & Deploy via GitHub Actions (for "GitHub Actions" source)
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
