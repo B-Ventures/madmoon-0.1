@@ -1,9 +1,20 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
-import firebaseConfig from "./firebase-applet-config.json" assert { type: "json" };
+
+// Safely load firebase config
+let firebaseConfig: any = {};
+try {
+  const configPath = path.join(process.cwd(), "firebase-applet-config.json");
+  if (fs.existsSync(configPath)) {
+    firebaseConfig = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  }
+} catch (e) {
+  console.warn("Failed to read firebase-applet-config.json:", e);
+}
 
 const app = express();
 const PORT = 3000;

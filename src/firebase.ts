@@ -48,7 +48,7 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Initialize Auth
 export const auth = getAuth(app);
 
-// Initialize Firestore with database ID & auto-detect long polling for restricted iframe/network environments
+// Initialize Firestore with database ID & force long polling for restricted iframe/network environments
 const dbId = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)' 
   ? firebaseConfig.firestoreDatabaseId 
   : undefined;
@@ -56,13 +56,29 @@ const dbId = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatab
 let firestoreInstance;
 try {
   firestoreInstance = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
+    experimentalForceLongPolling: true,
   }, dbId);
 } catch (e) {
   firestoreInstance = getFirestore(app, dbId);
 }
 
 export const db = firestoreInstance;
+
+// Helper with timeout for initial Firestore reads
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 3000, fallback: T): Promise<T> {
+  let timer: any;
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), timeoutMs);
+  });
+  try {
+    const result = await Promise.race([promise, timeoutPromise]);
+    clearTimeout(timer);
+    return result;
+  } catch (err) {
+    clearTimeout(timer);
+    return fallback;
+  }
+}
 
 // Collection References
 export const merchantsCol = collection(db, 'merchants');
@@ -73,24 +89,28 @@ export const reportsCol = collection(db, 'reports');
  */
 export async function seedInitialStoresIfEmpty(): Promise<MerchantStore[]> {
   try {
-    const snapshot = await getDocs(merchantsCol);
-    if (snapshot.empty) {
-      console.log('Seeding initial stores into Firestore...');
-      const seeded: MerchantStore[] = [];
-      for (const store of INITIAL_STORES) {
-        const storeData: MerchantStore = {
-          ...store,
-          verificationStatus: 'active',
-          tier: 'Tier 2 - Officially Verified',
-          createdAt: new Date().toISOString()
-        };
-        await setDoc(doc(db, 'merchants', store.id), storeData);
-        seeded.push(storeData);
+    const fetchPromise = (async () => {
+      const snapshot = await getDocs(merchantsCol);
+      if (snapshot.empty) {
+        console.log('Seeding initial stores into Firestore...');
+        const seeded: MerchantStore[] = [];
+        for (const store of INITIAL_STORES) {
+          const storeData: MerchantStore = {
+            ...store,
+            verificationStatus: 'active',
+            tier: 'Tier 2 - Officially Verified',
+            createdAt: new Date().toISOString()
+          };
+          await setDoc(doc(db, 'merchants', store.id), storeData);
+          seeded.push(storeData);
+        }
+        return seeded;
+      } else {
+        return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as MerchantStore));
       }
-      return seeded;
-    } else {
-      return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as MerchantStore));
-    }
+    })();
+
+    return await withTimeout(fetchPromise, 3500, INITIAL_STORES);
   } catch (error) {
     console.warn('Firestore fetch/seed warning:', error);
     return INITIAL_STORES;
