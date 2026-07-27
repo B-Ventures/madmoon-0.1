@@ -12,6 +12,7 @@ import {
 } from 'firebase/auth';
 import { 
   getFirestore, 
+  initializeFirestore,
   collection, 
   doc, 
   getDocs, 
@@ -47,12 +48,21 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Initialize Auth
 export const auth = getAuth(app);
 
-// Initialize Firestore with database ID
+// Initialize Firestore with database ID & auto-detect long polling for restricted iframe/network environments
 const dbId = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)' 
   ? firebaseConfig.firestoreDatabaseId 
   : undefined;
 
-export const db = getFirestore(app, dbId);
+let firestoreInstance;
+try {
+  firestoreInstance = initializeFirestore(app, {
+    experimentalAutoDetectLongPolling: true,
+  }, dbId);
+} catch (e) {
+  firestoreInstance = getFirestore(app, dbId);
+}
+
+export const db = firestoreInstance;
 
 // Collection References
 export const merchantsCol = collection(db, 'merchants');
@@ -97,12 +107,18 @@ export function subscribeToMerchants(callback: (stores: MerchantStore[]) => void
         id: d.id,
         ...d.data()
       } as MerchantStore));
-      callback(stores);
+      if (stores.length > 0) {
+        callback(stores);
+      } else {
+        callback(INITIAL_STORES);
+      }
     }, (err) => {
-      console.warn('Snapshot error for merchants:', err);
+      console.warn('Snapshot error for merchants (operating in offline fallback mode):', err);
+      callback(INITIAL_STORES);
     });
   } catch (err) {
     console.warn('Failed to subscribe to merchants:', err);
+    callback(INITIAL_STORES);
     return () => {};
   }
 }
@@ -120,9 +136,11 @@ export function subscribeToReports(callback: (reports: DisputeReport[]) => void)
       callback(reports);
     }, (err) => {
       console.warn('Snapshot error for reports:', err);
+      callback([]);
     });
   } catch (err) {
     console.warn('Failed to subscribe to reports:', err);
+    callback([]);
     return () => {};
   }
 }
