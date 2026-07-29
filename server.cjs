@@ -131,6 +131,18 @@ async function startServer() {
       appType: "spa"
     });
     app.use(vite.middlewares);
+    app.get("*", async (req, res, next) => {
+      try {
+        const url = req.originalUrl;
+        const indexPath = import_path.default.resolve(process.cwd(), "index.html");
+        let template = import_fs.default.readFileSync(indexPath, "utf-8");
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e);
+        next(e);
+      }
+    });
   } else {
     const distPath = import_path.default.join(process.cwd(), "dist");
     app.use(import_express.default.static(distPath));
