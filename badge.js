@@ -53,12 +53,20 @@
   fetch(statusApiUrl)
     .then(function(res) { return res.json(); })
     .then(function(data) {
-      // REQUIREMENT: If showBadge is false, silently exit (return;) and do NOT inject any HTML/CSS into DOM
-      if (!data || !data.showBadge) {
+      // MODULE 4: Instant Revocation Check
+      // If store is suspended, pending, rejected, or invalid (and not domain_mismatch), EXIT IMMEDIATELY and render NOTHING.
+      const isDomainMismatch = data && (data.reason === 'domain_mismatch' || data.showWarningBadge === true);
+
+      if (!data || (!data.showBadge && !isDomainMismatch)) {
         return;
       }
 
       window.__MADMOON_BADGE_INITIALIZED__ = true;
+
+      // Construct target URLs
+      const targetUrl = isDomainMismatch
+        ? `${baseUrl}/?tab=disclaimer&error=domain_mismatch#disclaimer`
+        : `${baseUrl}/?verify=${encodeURIComponent(storeSlug)}#verify`;
 
       // Create badge container element
       const hostDiv = document.createElement('div');
@@ -93,11 +101,15 @@
           text-decoration: none;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(16, 185, 129, 0.15);
-          border: 1px solid ${theme === 'light' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(16, 185, 129, 0.3)'};
-          background: ${theme === 'light' 
-            ? 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)' 
-            : 'linear-gradient(135deg, #0f172a 0%, #022c22 100%)'};
-          color: ${theme === 'light' ? '#064e3b' : '#ffffff'};
+          border: 1px solid ${isDomainMismatch 
+            ? '#ef4444' 
+            : (theme === 'light' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(16, 185, 129, 0.3)')};
+          background: ${isDomainMismatch 
+            ? 'linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%)' 
+            : (theme === 'light' 
+              ? 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)' 
+              : 'linear-gradient(135deg, #0f172a 0%, #022c22 100%)')};
+          color: #ffffff;
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           font-size: ${size === 'compact' ? '12px' : '13px'};
@@ -106,8 +118,8 @@
         }
         .madmoon-badge-wrapper:hover {
           transform: translateY(-3px) scale(1.02);
-          border-color: #10b981;
-          box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.25), 0 10px 15px -5px rgba(0, 0, 0, 0.4);
+          border-color: ${isDomainMismatch ? '#f87171' : '#10b981'};
+          box-shadow: 0 15px 30px -5px ${isDomainMismatch ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.25)'}, 0 10px 15px -5px rgba(0, 0, 0, 0.4);
         }
         .madmoon-icon-container {
           position: relative;
@@ -117,8 +129,8 @@
           width: ${size === 'compact' ? '24px' : '28px'};
           height: ${size === 'compact' ? '24px' : '28px'};
           border-radius: 50%;
-          background: rgba(16, 185, 129, 0.15);
-          border: 1px solid rgba(16, 185, 129, 0.4);
+          background: ${isDomainMismatch ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)'};
+          border: 1px solid ${isDomainMismatch ? 'rgba(239, 68, 68, 0.5)' : 'rgba(16, 185, 129, 0.4)'};
           flex-shrink: 0;
         }
         .madmoon-icon-container svg {
@@ -132,8 +144,8 @@
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background-color: #10b981;
-          box-shadow: 0 0 8px #10b981;
+          background-color: ${isDomainMismatch ? '#ef4444' : '#10b981'};
+          box-shadow: 0 0 8px ${isDomainMismatch ? '#ef4444' : '#10b981'};
           animation: pulse 2s infinite;
         }
         @keyframes pulse {
@@ -148,7 +160,7 @@
           text-align: ${lang === 'ar' ? 'right' : 'left'};
         }
         .madmoon-brand {
-          color: #10b981;
+          color: ${isDomainMismatch ? '#fca5a5' : '#10b981'};
           font-weight: 900;
           letter-spacing: -0.01em;
           font-size: ${size === 'compact' ? '11px' : '12px'};
@@ -157,7 +169,7 @@
           gap: 4px;
         }
         .madmoon-status {
-          color: ${theme === 'light' ? '#1e293b' : '#f8fafc'};
+          color: #ffffff;
           font-weight: 700;
           font-size: ${size === 'compact' ? '12px' : '13px'};
           white-space: nowrap;
@@ -168,27 +180,35 @@
       `;
 
       const wrapperAnchor = document.createElement('a');
-      wrapperAnchor.href = verifyUrl;
+      wrapperAnchor.href = targetUrl;
       wrapperAnchor.target = '_blank';
       wrapperAnchor.rel = 'noopener noreferrer';
       wrapperAnchor.className = `madmoon-badge-wrapper pos-${position}`;
-      wrapperAnchor.title = lang === 'ar' ? 'عرض شهادة التوثيق الرسمية على منصة مضمون' : 'View Official Verification Certificate on Madmoon';
+      wrapperAnchor.title = isDomainMismatch
+        ? (lang === 'ar' ? '🔴 تنبيه أمني: عدم تطابق النطاق - انقر لمعرفة التفاصيل' : '🔴 Security Warning: Domain Mismatch - Click for details')
+        : (lang === 'ar' ? 'عرض شهادة التوثيق الرسمية على منصة مضمون' : 'View Official Verification Certificate on Madmoon');
 
-      const tierDisplay = data.tier || (lang === 'ar' ? 'متجر مضمون' : 'Verified Identity Store');
+      const tierDisplay = isDomainMismatch
+        ? (lang === 'ar' ? '🔴 نطاق غير موثق / مصدر غير مصرح' : '🔴 Unverified Domain Mismatch')
+        : (data.tier || (lang === 'ar' ? 'متجر مضمون' : 'Verified Identity Store'));
 
-      wrapperAnchor.innerHTML = `
-        <div class="madmoon-icon-container">
-          <svg viewBox="0 0 100 100" fill="none">
+      const iconSvg = isDomainMismatch
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+        : `<svg viewBox="0 0 100 100" fill="none">
             <path d="M15 38 L40 63 L85 18 L85 34 L40 79 L15 54 Z" fill="#10B981"></path>
             <polygon points="15,66 15,85 34,85" fill="#34D399"></polygon>
             <polygon points="48,85 85,48 85,63 63,85" fill="#34D399"></polygon>
             <polygon points="73,85 85,73 85,85" fill="#34D399"></polygon>
-          </svg>
+          </svg>`;
+
+      wrapperAnchor.innerHTML = `
+        <div class="madmoon-icon-container">
+          ${iconSvg}
           <span class="madmoon-pulse-ring"></span>
         </div>
         <div class="madmoon-text-content">
           <span class="madmoon-brand">
-            ${lang === 'ar' ? 'مضمون 🇯🇴' : 'MADMOON'}
+            ${isDomainMismatch ? (lang === 'ar' ? 'مضمون ⚠️' : 'MADMOON ALERT') : (lang === 'ar' ? 'مضمون 🇯🇴' : 'MADMOON')}
           </span>
           <span class="madmoon-status">
             ${tierDisplay}
@@ -198,7 +218,7 @@
 
       wrapperAnchor.addEventListener('click', function (e) {
         e.preventDefault();
-        window.open(verifyUrl, '_blank', 'noopener,noreferrer');
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
       });
 
       shadow.appendChild(styleEl);

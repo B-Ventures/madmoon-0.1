@@ -102,6 +102,7 @@ app.get(["/api/merchant-status", "/api/store-status"], async (req, res) => {
     if (!domainMatches) {
       return res.json({
         showBadge: false,
+        showWarningBadge: true,
         reason: "domain_mismatch",
         verificationStatus: "active",
         registeredDomain: storeDomain,
