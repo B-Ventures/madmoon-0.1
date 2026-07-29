@@ -65,8 +65,8 @@
 
       // Construct target URLs
       const targetUrl = isDomainMismatch
-        ? `${baseUrl}/?tab=disclaimer&error=domain_mismatch#disclaimer`
-        : `${baseUrl}/?verify=${encodeURIComponent(storeSlug)}#verify`;
+        ? `${baseUrl}/disclaimer?error=domain_mismatch`
+        : `${baseUrl}/verify/${encodeURIComponent(storeSlug)}`;
 
       // Create badge container element
       const hostDiv = document.createElement('div');
