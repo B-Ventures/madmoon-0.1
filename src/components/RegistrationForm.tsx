@@ -301,27 +301,32 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
     try {
       if (typeof window !== 'undefined') {
-        let recaptcha = (window as any).recaptchaVerifier;
-
-        if (!recaptcha) {
-          // Replace container DOM node to guarantee a fresh element for grecaptcha
-          let container = document.getElementById('recaptcha-container');
-          if (container && container.parentNode) {
-            const newContainer = document.createElement('div');
-            newContainer.id = 'recaptcha-container';
-            newContainer.className = 'hidden';
-            container.parentNode.replaceChild(newContainer, container);
-            container = newContainer;
-          }
-
-          recaptcha = new RecaptchaVerifier(auth, container || 'recaptcha-container', {
-            size: 'invisible',
-            callback: () => {
-              // Recaptcha resolved
+        // Clean up any existing verifier instance to guarantee a fresh reCAPTCHA token
+        if ((window as any).recaptchaVerifier) {
+          try {
+            if ((window as any).recaptchaVerifier.clear) {
+              (window as any).recaptchaVerifier.clear();
             }
-          });
-          (window as any).recaptchaVerifier = recaptcha;
+          } catch (e) {
+            // Ignore cleanup errors
+          }
+          (window as any).recaptchaVerifier = null;
         }
+
+        let container = document.getElementById('recaptcha-container');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'recaptcha-container';
+          document.body.appendChild(container);
+        }
+
+        const recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => {
+            // Recaptcha resolved
+          }
+        });
+        (window as any).recaptchaVerifier = recaptcha;
 
         const confirmation = await signInWithPhoneNumber(auth, formattedFullPhone, recaptcha);
         setConfirmationResult(confirmation);
@@ -331,7 +336,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
     } catch (err: any) {
       console.error("Firebase SMS OTP dispatch error:", err?.message || err);
       
-      // Clean up reCAPTCHA verifier instance and replace container DOM element for clean re-initialization
+      // Clean up reCAPTCHA verifier instance
       try {
         if ((window as any).recaptchaVerifier?.clear) {
           (window as any).recaptchaVerifier.clear();
@@ -341,42 +346,52 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
       }
       (window as any).recaptchaVerifier = null;
 
-      const container = document.getElementById('recaptcha-container');
-      if (container && container.parentNode) {
-        const newContainer = document.createElement('div');
-        newContainer.id = 'recaptcha-container';
-        newContainer.className = 'hidden';
-        container.parentNode.replaceChild(newContainer, container);
-      }
-
       setConfirmationResult(null);
-      setOtpSent(true);
-      setIsDemoOtpFallback(true);
-      if (!otpCode) {
-        setOtpCode('123456');
+
+      // Check if domain is production/custom domain (e.g. madmoon.bventures.me, madmoon.jo)
+      const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+      const isProductionDomain = hostname !== 'localhost' && !hostname.includes('127.0.0.1') && !hostname.includes('ais-dev');
+
+      if (isProductionDomain) {
+        // Strictly DO NOT activate demo mode on production domains
+        setIsDemoOtpFallback(false);
+        setOtpSent(false);
+        setOtpCode('');
+      } else {
+        // Fallback demo mode allowed only in local dev environment
+        setIsDemoOtpFallback(true);
+        setOtpSent(true);
+        if (!otpCode) {
+          setOtpCode('123456');
+        }
       }
 
+      const isCaptchaCheckFailed = err?.code === 'auth/captcha-check-failed' || String(err?.message || '').includes('captcha-check-failed');
       const isAuthDisabled = err?.code === 'auth/operation-not-allowed' || String(err?.message || '').includes('operation-not-allowed');
       const isTooManyRequests = err?.code === 'auth/too-many-requests' || String(err?.message || '').includes('too-many-requests');
-      const isRecaptchaAlreadyRendered = String(err?.message || '').includes('reCAPTCHA has already been rendered');
+      const isInvalidPhone = err?.code === 'auth/invalid-phone-number' || String(err?.message || '').includes('invalid-phone-number');
 
       let errorMessage = '';
-      if (isAuthDisabled) {
+      if (isCaptchaCheckFailed) {
         errorMessage = lang === 'ar'
-          ? 'ملاحظة: موفر خدمة SMS Phone Auth غير مفعّل في Firebase Console. تم تفعيل النمط التجريبي للتوثيق تلقائياً (استخدم الرمز: 123456).'
-          : 'Notice: Firebase Phone Auth is disabled in Firebase Console. Demo OTP mode activated automatically (Use code: 123456).';
+          ? `تعذر إرسال رمز SMS (auth/captcha-check-failed). يُرجى التأكد من إضافة النطاق (${hostname}) في Firebase Console > Authentication > Settings > Authorized Domains، وإعادة المحاولة.`
+          : `SMS delivery failed (auth/captcha-check-failed). Please ensure (${hostname}) is listed under Firebase Console > Authentication > Settings > Authorized Domains and try again.`;
+      } else if (isAuthDisabled) {
+        errorMessage = lang === 'ar'
+          ? 'تنبيه: موفر خدمة SMS Phone Auth غير مفعّل في Firebase Console.'
+          : 'Notice: Firebase Phone Auth is not enabled in Firebase Console.';
       } else if (isTooManyRequests) {
         errorMessage = lang === 'ar'
-          ? 'ملاحظة: تجاوز عدد طلبات SMS الحد المسموح به مؤقتاً (auth/too-many-requests). تم تفعيل نمط التحقق التجريبي تلقائياً (استخدم الرمز: 123456).'
-          : 'Notice: SMS request limit reached temporarily (auth/too-many-requests). Demo verification mode activated automatically (Use code: 123456).';
-      } else if (isRecaptchaAlreadyRendered) {
+          ? 'تنبيه: تم تجاوز حد طلبات SMS المسموح به مؤقتاً. يُرجى المحاولة لاحقاً.'
+          : 'Notice: SMS request limit reached temporarily. Please try again later.';
+      } else if (isInvalidPhone) {
         errorMessage = lang === 'ar'
-          ? 'ملاحظة: تمت إعادة تهيئة التحقق الأمني reCAPTCHA. تم تفعيل نمط التحقق التجريبي تلقائياً (استخدم الرمز: 123456).'
-          : 'Notice: reCAPTCHA security verifier reset. Demo verification mode activated automatically (Use code: 123456).';
+          ? 'رقم الهاتف غير صحيح أو غير مدعوم لإرسال SMS.'
+          : 'Invalid phone number format for SMS verification.';
       } else {
         errorMessage = lang === 'ar'
-          ? `تعذر إرسال SMS عبر Firebase (${err?.code || err?.message || 'خطأ'}). تم تفعيل النمط التجريبي تلقائياً (استخدم الرمز: 123456).`
-          : `Failed to dispatch SMS via Firebase (${err?.code || err?.message || 'error'}). Demo OTP mode activated automatically (Use code: 123456).`;
+          ? `تعذر إرسال SMS عبر Firebase: ${err?.message || err?.code || 'خطأ غير معروف'}`
+          : `Failed to send SMS via Firebase: ${err?.message || err?.code || 'Unknown error'}`;
       }
 
       setOtpError(errorMessage);
@@ -497,7 +512,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-10 px-4 sm:px-6 lg:px-8">
       {/* Invisible Recaptcha Container */}
-      <div id="recaptcha-container" className="hidden"></div>
+      <div id="recaptcha-container"></div>
 
       <div className="max-w-3xl mx-auto space-y-8">
         
