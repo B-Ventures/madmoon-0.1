@@ -38,6 +38,42 @@ import {
   seedInitialStoresIfEmpty
 } from './firebase';
 
+const parseRouteFromUrl = (): { tab: ViewTab; slug: string | null } => {
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  const tabParam = params.get('tab');
+
+  if (path.includes('/terms') || hash === '#terms' || tabParam === 'terms') {
+    return { tab: 'terms', slug: null };
+  }
+  if (path.includes('/privacy') || hash === '#privacy' || tabParam === 'privacy') {
+    return { tab: 'privacy', slug: null };
+  }
+  if (path.includes('/disclaimer') || hash === '#disclaimer' || tabParam === 'disclaimer' || params.get('error') === 'domain_mismatch') {
+    return { tab: 'disclaimer', slug: null };
+  }
+  if (path.includes('/admin') || hash === '#admin' || tabParam === 'admin') {
+    return { tab: 'admin', slug: null };
+  }
+  if (path.includes('/directory') || hash === '#directory' || tabParam === 'directory') {
+    return { tab: 'directory', slug: null };
+  }
+  if (path.includes('/register') || hash === '#register' || tabParam === 'register') {
+    return { tab: 'register', slug: null };
+  }
+
+  let slug: string | null = params.get('verify');
+  if (!slug && path.includes('/verify/')) {
+    slug = path.split('/verify/')[1]?.split('/')[0]?.split('?')[0] || null;
+  }
+  if (slug || path.includes('/verify')) {
+    return { tab: 'verify', slug: slug || 'amman-artisans' };
+  }
+
+  return { tab: 'home', slug: null };
+};
+
 export default function App() {
   // Language State (Arabic RTL default)
   const [lang, setLang] = useState<Language>('ar');
@@ -59,11 +95,56 @@ export default function App() {
     return INITIAL_STORES;
   });
 
+  // Parse current URL route on initial load
+  const initialRoute = parseRouteFromUrl();
+
   // Current active view tab
-  const [activeTab, setActiveTab] = useState<ViewTab>('home');
+  const [activeTab, setActiveTabState] = useState<ViewTab>(initialRoute.tab);
 
   // Active store selected for Badge Generator or Public Verification Certificate
-  const [selectedStoreSlug, setSelectedStoreSlug] = useState<string>('amman-artisans');
+  const [selectedStoreSlug, setSelectedStoreSlug] = useState<string>(initialRoute.slug || 'amman-artisans');
+
+  // Navigation tab updater that updates state and keeps browser URL synced
+  const setActiveTab = (tab: ViewTab, targetSlug?: string) => {
+    setActiveTabState(tab);
+
+    const s = targetSlug || selectedStoreSlug;
+    if (targetSlug) {
+      setSelectedStoreSlug(targetSlug);
+    }
+
+    let newPath = '/';
+    if (tab === 'terms') newPath = '/terms';
+    else if (tab === 'privacy') newPath = '/privacy';
+    else if (tab === 'disclaimer') newPath = '/disclaimer';
+    else if (tab === 'directory') newPath = '/directory';
+    else if (tab === 'register') newPath = '/register';
+    else if (tab === 'admin') newPath = '/admin';
+    else if (tab === 'verify') newPath = `/verify/${s}`;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error')) {
+      newPath += `?error=${params.get('error')}`;
+    }
+
+    if (window.location.pathname !== newPath) {
+      window.history.pushState(null, '', newPath);
+    }
+  };
+
+  // Listen for browser Back / Forward buttons (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseRouteFromUrl();
+      setActiveTabState(route.tab);
+      if (route.slug) {
+        setSelectedStoreSlug(route.slug);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Admin Auth State
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
@@ -161,32 +242,6 @@ export default function App() {
       htmlEl.setAttribute('lang', 'en');
     }
   }, [lang]);
-
-  // Handle URL route checks (/admin, /terms, /privacy, /disclaimer, ?verify=slug, ?error=domain_mismatch)
-  useEffect(() => {
-    const path = window.location.pathname;
-    const hash = window.location.hash;
-    const params = new URLSearchParams(window.location.search);
-    
-    if (path.includes('/admin') || hash === '#admin' || params.get('tab') === 'admin') {
-      setActiveTab('admin');
-    } else if (path.includes('/terms') || hash === '#terms' || params.get('tab') === 'terms') {
-      setActiveTab('terms');
-    } else if (path.includes('/privacy') || hash === '#privacy' || params.get('tab') === 'privacy') {
-      setActiveTab('privacy');
-    } else if (path.includes('/disclaimer') || hash === '#disclaimer' || params.get('tab') === 'disclaimer' || params.get('error') === 'domain_mismatch') {
-      setActiveTab('disclaimer');
-    }
-
-    const verifySlug = params.get('verify');
-    if (verifySlug) {
-      const match = stores.find((s) => s.slug === verifySlug);
-      if (match) {
-        setSelectedStoreSlug(verifySlug);
-        setActiveTab('verify');
-      }
-    }
-  }, [stores]);
 
   // Find active selected store object
   const activeStore = stores.find((s) => s.slug === selectedStoreSlug) || stores[0];
