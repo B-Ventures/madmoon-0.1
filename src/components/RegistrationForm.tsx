@@ -329,12 +329,10 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
         });
         (window as any).recaptchaVerifier = recaptcha;
 
-        await recaptcha.render();
-
         // 20-second timeout race to prevent infinite hanging in "sending OTP" status
         const phoneAuthPromise = signInWithPhoneNumber(auth, formattedFullPhone, recaptcha);
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('SMS OTP request timed out. Please check network/Firebase configuration and try again.')), 20000);
+          setTimeout(() => reject(new Error('SMS OTP request timed out (20s). Please verify domain authorization in Firebase Console.')), 20000);
         });
 
         const confirmation = await Promise.race([phoneAuthPromise, timeoutPromise]);
@@ -423,24 +421,23 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
     try {
       if (confirmationResult && !isDemoOtpFallback) {
-        try {
-          await confirmationResult.confirm(otpCode);
-        } catch (confirmErr: any) {
-          if (otpCode === '123456') {
-            console.warn("Real OTP verification failed, defaulting to demo verification code 123456.");
-          } else {
-            throw confirmErr;
-          }
-        }
-      } else {
-        // Fallback demo mode verification when Firebase Phone Auth is disabled, rate limited, or unavailable
-        if (otpCode !== '123456' && otpCode.length < 4) {
+        // Strict confirmation against Firebase Auth — no bypass allowed
+        await confirmationResult.confirm(otpCode);
+      } else if (isDemoOtpFallback) {
+        // Strict verification in demo mode — requires exact code 123456
+        if (otpCode !== '123456') {
           throw new Error(
             lang === 'ar'
               ? 'رمز التحقق التجريبي غير صحيح (استخدم 123456)'
               : 'Invalid demo OTP code (Use 123456)'
           );
         }
+      } else {
+        throw new Error(
+          lang === 'ar'
+            ? 'انتهت جلسة التحقق، يرجى إعادة طلب رمز جديد عبر SMS'
+            : 'Verification session expired. Please request a new SMS OTP code.'
+        );
       }
 
       const slug = generateUniqueSlug(storeName, existingStores);
