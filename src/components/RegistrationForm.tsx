@@ -474,7 +474,8 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
   const handleCopyCode = () => {
     if (!createdStore) return;
-    const snippet = `<script src="https://madmoon.jo/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" async></script>`;
+    const baseUrl = window.location.origin;
+    const snippet = `<script src="${baseUrl}/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" async></script>`;
     navigator.clipboard.writeText(snippet);
     setCopied(true);
     setTimeout(() => setCopied(false), 2200);
@@ -1252,7 +1253,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-xs font-mono text-emerald-300 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed dir-ltr" 
                   dir="ltr"
                 >
-                  {`<script src="https://madmoon.jo/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" data-lang="${lang}" async></script>`}
+                  {`<script src="${window.location.origin}/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" data-lang="${lang}" async></script>`}
                 </pre>
 
                 <button

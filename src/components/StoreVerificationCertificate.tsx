@@ -398,7 +398,7 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
           <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-600">
             <div>
               <p className="font-extrabold text-slate-900">سجل مضمون التجاري العام | Madmoon Trust Authority</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">https://madmoon.jo</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{window.location.origin}</p>
             </div>
 
             <div className="text-right sm:text-left font-mono text-[11px] text-slate-500">

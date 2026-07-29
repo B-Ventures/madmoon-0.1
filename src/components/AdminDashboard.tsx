@@ -209,16 +209,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleResendWhatsAppSnippet = (store: MerchantStore) => {
+    const baseUrl = window.location.origin;
     const text = lang === 'ar'
-      ? `أهلاً ${store.ownerName || store.nameAr}، تم إصدار كود شارة مضمون لمتجرك (${store.websiteUrl}). الكود السريع:\n<script src="https://madmoon.jo/badge.js" data-id="${store.verificationBadgeId}"></script>`
-      : `Hello ${store.ownerName || store.nameEn}, your Madmoon badge snippet is ready for (${store.websiteUrl}):\n<script src="https://madmoon.jo/badge.js" data-id="${store.verificationBadgeId}"></script>`;
+      ? `أهلاً ${store.ownerName || store.nameAr}، تم إصدار كود شارة مضمون لمتجرك (${store.websiteUrl}). الكود السريع:\n<script src="${baseUrl}/badge.js" data-id="${store.verificationBadgeId}" data-slug="${store.slug}"></script>`
+      : `Hello ${store.ownerName || store.nameEn}, your Madmoon badge snippet is ready for (${store.websiteUrl}):\n<script src="${baseUrl}/badge.js" data-id="${store.verificationBadgeId}" data-slug="${store.slug}"></script>`;
     
     navigator.clipboard.writeText(text);
     showToast(lang === 'ar' ? `تم تجهيز ونسخ كود الواتساب لـ ${store.phone}` : `WhatsApp snippet copied for ${store.phone}!`);
   };
 
   const handleCopyEmbedCode = (store: MerchantStore) => {
-    const snippet = `<script src="https://madmoon.jo/badge.js" data-badge-id="${store.verificationBadgeId}" data-slug="${store.slug}"></script>`;
+    const baseUrl = window.location.origin;
+    const snippet = `<script src="${baseUrl}/badge.js" data-badge-id="${store.verificationBadgeId}" data-slug="${store.slug}"></script>`;
     navigator.clipboard.writeText(snippet);
     setCopiedId(store.id);
     setTimeout(() => setCopiedId(null), 2000);
@@ -927,7 +929,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <pre className="bg-slate-900 text-emerald-300 p-3.5 rounded-xl text-[11px] font-mono whitespace-pre-wrap break-all dir-ltr">
-                {`<script src="https://madmoon.jo/badge.js" data-badge-id="${selectedStore.verificationBadgeId}" data-slug="${selectedStore.slug}"></script>`}
+                {`<script src="${window.location.origin}/badge.js" data-badge-id="${selectedStore.verificationBadgeId}" data-slug="${selectedStore.slug}"></script>`}
               </pre>
             </div>
 
