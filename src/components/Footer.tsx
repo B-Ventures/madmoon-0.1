@@ -34,20 +34,26 @@ export const Footer: React.FC<FooterProps> = ({ lang, setActiveTab }) => {
           </div>
 
           {/* Quick Nav Links */}
-          <div className="flex flex-wrap items-center gap-6 text-xs font-extrabold">
-            <button onClick={() => setActiveTab('home')} className="hover:text-emerald-800 transition-colors">
+          <div className="flex flex-wrap items-center gap-5 sm:gap-6 text-xs font-extrabold">
+            <button onClick={() => setActiveTab('home')} className="hover:text-emerald-800 transition-colors cursor-pointer">
               {t.navHome}
             </button>
-            <button onClick={() => setActiveTab('register')} className="hover:text-emerald-800 transition-colors">
+            <button onClick={() => setActiveTab('register')} className="hover:text-emerald-800 transition-colors cursor-pointer">
               {t.navRegister}
             </button>
-            <button onClick={() => setActiveTab('directory')} className="hover:text-emerald-800 transition-colors">
+            <button onClick={() => setActiveTab('directory')} className="hover:text-emerald-800 transition-colors cursor-pointer">
               {t.navDirectory}
             </button>
-            <button onClick={() => setActiveTab('about')} className="hover:text-emerald-800 transition-colors">
-              {t.navAbout}
+            <button onClick={() => setActiveTab('terms')} className="hover:text-emerald-800 transition-colors cursor-pointer text-slate-700">
+              {lang === 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
             </button>
-            <button onClick={() => setActiveTab('admin')} className="hover:text-emerald-800 transition-colors flex items-center gap-1 text-slate-800">
+            <button onClick={() => setActiveTab('privacy')} className="hover:text-emerald-800 transition-colors cursor-pointer text-slate-700">
+              {lang === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
+            </button>
+            <button onClick={() => setActiveTab('disclaimer')} className="hover:text-emerald-800 transition-colors cursor-pointer text-slate-700">
+              {lang === 'ar' ? 'إخلاء المسؤولية' : 'Disclaimer & Seal Policy'}
+            </button>
+            <button onClick={() => setActiveTab('admin')} className="hover:text-emerald-800 transition-colors flex items-center gap-1 text-slate-800 cursor-pointer">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
               {t.navAdmin}
             </button>

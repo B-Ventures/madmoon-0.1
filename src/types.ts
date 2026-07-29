@@ -64,4 +64,4 @@ export interface DisputeReport {
   status: 'pending' | 'reviewing' | 'resolved';
 }
 
-export type ViewTab = 'home' | 'register' | 'directory' | 'verify' | 'about' | 'admin';
+export type ViewTab = 'home' | 'register' | 'directory' | 'verify' | 'about' | 'admin' | 'terms' | 'privacy' | 'disclaimer';

@@ -13,6 +13,9 @@ import { StoreVerificationCertificate } from './components/StoreVerificationCert
 import { ReportDisputeModal } from './components/ReportDisputeModal';
 import { StoreRegistryDirectory } from './components/StoreRegistryDirectory';
 import { HowItWorksSection } from './components/HowItWorksSection';
+import { TermsPage } from './components/TermsPage';
+import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
+import { DisclaimerPage } from './components/DisclaimerPage';
 import { Footer } from './components/Footer';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -159,14 +162,20 @@ export default function App() {
     }
   }, [lang]);
 
-  // Handle URL route checks (/admin or ?verify=slug or #admin)
+  // Handle URL route checks (/admin, /terms, /privacy, /disclaimer, ?verify=slug, ?error=domain_mismatch)
   useEffect(() => {
     const path = window.location.pathname;
     const hash = window.location.hash;
     const params = new URLSearchParams(window.location.search);
     
-    if (path.includes('/admin') || hash === '#admin') {
+    if (path.includes('/admin') || hash === '#admin' || params.get('tab') === 'admin') {
       setActiveTab('admin');
+    } else if (path.includes('/terms') || hash === '#terms' || params.get('tab') === 'terms') {
+      setActiveTab('terms');
+    } else if (path.includes('/privacy') || hash === '#privacy' || params.get('tab') === 'privacy') {
+      setActiveTab('privacy');
+    } else if (path.includes('/disclaimer') || hash === '#disclaimer' || params.get('tab') === 'disclaimer' || params.get('error') === 'domain_mismatch') {
+      setActiveTab('disclaimer');
     }
 
     const verifySlug = params.get('verify');
@@ -300,6 +309,9 @@ export default function App() {
             existingStores={stores}
             onStoreRegistered={handleStoreRegistered}
             onOpenCertificate={handleOpenCertificate}
+            onOpenTerms={() => setActiveTab('terms')}
+            onOpenPrivacy={() => setActiveTab('privacy')}
+            onOpenDisclaimer={() => setActiveTab('disclaimer')}
           />
         )}
 
@@ -325,6 +337,31 @@ export default function App() {
           <HowItWorksSection
             lang={lang}
             onRegisterClick={() => setActiveTab('register')}
+          />
+        )}
+
+        {activeTab === 'terms' && (
+          <TermsPage
+            lang={lang}
+            onBackToRegister={() => setActiveTab('register')}
+            onNavigateHome={() => setActiveTab('home')}
+          />
+        )}
+
+        {activeTab === 'privacy' && (
+          <PrivacyPolicyPage
+            lang={lang}
+            onBackToRegister={() => setActiveTab('register')}
+            onNavigateHome={() => setActiveTab('home')}
+          />
+        )}
+
+        {activeTab === 'disclaimer' && (
+          <DisclaimerPage
+            lang={lang}
+            onBackToRegister={() => setActiveTab('register')}
+            onNavigateHome={() => setActiveTab('home')}
+            onReportIssue={() => setReportModalOpen(true)}
           />
         )}
 

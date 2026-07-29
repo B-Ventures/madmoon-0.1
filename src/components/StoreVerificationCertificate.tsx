@@ -221,7 +221,7 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 font-medium max-w-lg mx-auto leading-relaxed pt-1">
+            <p className="text-xs text-slate-600 font-medium max-w-xl mx-auto leading-relaxed pt-1">
               {isPending ? (
                 lang === 'ar'
                   ? 'هذا المتجر تحت المراجعة والتدقيق حالياً من قِبل إدارة المنصة. لم يتم تفعيل شهادة الاعتماد بشكل نهائي.'
@@ -232,12 +232,12 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
                   : 'Verification for this merchant is rejected or suspended due to non-compliance.'
               ) : isBusiness ? (
                 lang === 'ar'
-                  ? 'تشهد منصة مضمون المعتمدة لمراقبة التجارة الإلكترونية بأن المنشأة المبينة أعلاه موثقة وفق السجل التجاري الرسمي ورقم الهاتف والنطاق الإلكتروني.'
-                  : 'Madmoon Verification Registry hereby certifies that the e-commerce establishment above is validated against official Commercial Registry records, active domain, and verified hotline.'
+                  ? 'يشهد سجل توثيق مضمون أن السجل التجاري والحالة القانونية لهذه المنشأة متطابقة مع سجلات البيانات الحكومية الرسمية اعتباراً من تاريخ التدقيق.'
+                  : 'Madmoon Verification Registry certifies that the Commercial Registration (CR) and legal status of this entity matched official government database records as of the audit date.'
               ) : (
                 lang === 'ar'
-                  ? 'تشهد منصة مضمون المعتمدة لمراقبة التجارة الإلكترونية بأن متجر الفرد المبين أعلاه مؤكد الهوية والتواصل وفق النطاق الإلكتروني ورقم الواتساب المعتمد.'
-                  : 'Madmoon Verification Registry hereby certifies that the individual seller account above is verified for contact identity via active domain and verified WhatsApp.'
+                  ? 'يشهد سجل توثيق مضمون أن حساب التاجر الفردي أعلاه تم التحقق من هوية تواصله عبر ملكية النطاق الفعالة وتوثيق رمز واتساب. لا تضمن مضمون جودة المنتجات أو شحن الشحنات.'
+                  : 'Madmoon Verification Registry certifies that the individual merchant account above is verified for contact identity via active domain ownership and verified WhatsApp OTP. Madmoon does not warrant product quality or shipping fulfillment.'
               )}
             </p>
           </div>
@@ -277,14 +277,14 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
                   ) : isBusiness ? (
                     <span className="text-emerald-800">
                       ✓ {lang === 'ar'
-                        ? `مطابق وموثق رسمياً مع السجلات الحكومية (${countryInfo.flag} ${countryInfo.nameAr})`
-                        : `Officially matched with government records (${countryInfo.nameEn})`}
+                        ? `منشأة مسجلة - مطابقة للسجلات الرسمية (${countryInfo.flag} ${countryInfo.nameAr})`
+                        : `✓ Registered Entity - Official Record Matched (${countryInfo.nameEn})`}
                     </span>
                   ) : (
                     <span className="text-emerald-800">
                       ✓ {lang === 'ar'
-                        ? `متجر فردي - هوية تواصل مؤكدة (معفى من التسجيل التجاري)`
-                        : `Individual Store - Verified Contact Identity (Exempt from CR)`}
+                        ? `✓ كيان فردي - هوية تواصل موثقة (معفى من السجل التجاري)`
+                        : `✓ Individual Entity - Verified Contact Identity (Exempt from Commercial Registration)`}
                     </span>
                   )}
                 </span>
@@ -460,6 +460,18 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
             </button>
           </div>
 
+        </div>
+
+        {/* Universal Certificate Footnote - Light Theme */}
+        <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs mt-6">
+          <div className="text-xs text-slate-700 font-medium leading-relaxed">
+            <span className="font-extrabold text-[#047857] text-xs block mb-1">
+              {lang === 'ar' ? '⚖️ إشعار قانوني:' : '⚖️ Legal Notice:'}
+            </span>
+            {lang === 'ar'
+              ? 'إشعار قانوني: مضمون هو بروتوكول توثيق رقمي مستقل ولا يعتبر طرفاً في أي عملية تجارية أو بيع. التوثيق يؤكد صحة البيانات المدخلة ولا يعتبر ضماناً للمنتجات أو التوصيل.'
+              : 'Legal Notice: Madmoon is an independent verification protocol and is not a party to sales transactions or fulfillment. Verification confirms data authenticity and does not constitute a product or delivery guarantee.'}
+          </div>
         </div>
 
       </div>

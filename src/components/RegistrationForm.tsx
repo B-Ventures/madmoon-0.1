@@ -40,6 +40,9 @@ interface RegistrationFormProps {
   existingStores?: MerchantStore[];
   onStoreRegistered: (store: MerchantStore) => void;
   onOpenCertificate?: (slug: string) => void;
+  onOpenTerms?: () => void;
+  onOpenPrivacy?: () => void;
+  onOpenDisclaimer?: () => void;
 }
 
 // Geometric Madmoon "M/م" Checkmark Badge Icon
@@ -158,12 +161,18 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   lang,
   existingStores = [],
   onStoreRegistered,
-  onOpenCertificate
+  onOpenCertificate,
+  onOpenTerms,
+  onOpenPrivacy,
+  onOpenDisclaimer
 }) => {
   const t = translations[lang];
 
   // Wizard Step: 'form' (Step 1) | 'otp' (Step 2) | 'success' (Step 3)
   const [step, setStep] = useState<'form' | 'otp' | 'success'>('form');
+
+  // Mandatory Consent Checkbox
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   // Parent Category: Retail / Store vs Services / Agencies / Creators
   const [businessActivity, setBusinessActivity] = useState<'retail' | 'services'>('retail');
@@ -245,6 +254,15 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
         lang === 'ar' 
           ? 'يرجى تصحيح أخطاء مدخلات نموذج التسجيل قبل المتابعة' 
           : 'Please fix validation errors in the registration form before proceeding'
+      );
+      return;
+    }
+
+    if (!agreeTerms) {
+      setFormSummaryError(
+        lang === 'ar'
+          ? 'يجب الموافقة على شروط خدمة التاجر، إرشادات مكافحة الاحتيال، واتفاقية معالجة البيانات للمتابعة.'
+          : 'You must agree to the Merchant Terms of Service, Anti-Fraud Guidelines, and Data Processing Agreement to proceed.'
       );
       return;
     }
@@ -1002,6 +1020,32 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 </div>
               </div>
 
+              {/* MODULE 1: Mandatory Consent Checkbox */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/90 space-y-2">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={agreeTerms}
+                    onChange={(e) => {
+                      setAgreeTerms(e.target.checked);
+                      if (formSummaryError) setFormSummaryError(null);
+                    }}
+                    className="mt-1 w-4 h-4 text-[#047857] rounded border-slate-300 focus:ring-[#047857] cursor-pointer shrink-0"
+                  />
+                  <span className="text-xs text-slate-700 leading-relaxed font-semibold">
+                    {lang === 'ar' ? (
+                      <>
+                        أوافق على <button type="button" onClick={() => onOpenTerms?.()} className="text-[#047857] underline font-black hover:text-[#036247]">شروط خدمة التاجر الخاصة بمضمون</button>، و<button type="button" onClick={() => onOpenDisclaimer?.()} className="text-[#047857] underline font-black hover:text-[#036247]">إرشادات مكافحة الاحتيال</button>، و<button type="button" onClick={() => onOpenPrivacy?.()} className="text-[#047857] underline font-black hover:text-[#036247]">سياسة الخصوصية</button>. وأقر بأن جميع البيانات المدخلة والنطاقات ورقم الواتساب صحيحة ومملوكة قانونياً لمنشأتي.
+                      </>
+                    ) : (
+                      <>
+                        I agree to the <button type="button" onClick={() => onOpenTerms?.()} className="text-[#047857] underline font-black hover:text-[#036247]">Madmoon Merchant Terms of Service</button>, <button type="button" onClick={() => onOpenDisclaimer?.()} className="text-[#047857] underline font-black hover:text-[#036247]">Anti-Fraud Guidelines</button>, and <button type="button" onClick={() => onOpenPrivacy?.()} className="text-[#047857] underline font-black hover:text-[#036247]">Privacy Policy</button>. I certify that all submitted business details, domains, and contact channels are accurate and legally owned by my entity.
+                      </>
+                    )}
+                  </span>
+                </label>
+              </div>
+
               {/* Form level error summary banner */}
               {formSummaryError && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-900 p-4 rounded-2xl text-xs font-bold flex items-center gap-2.5 animate-fadeIn">
@@ -1019,6 +1063,18 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 <span>{lang === 'ar' ? 'إصدار ختم التوثيق الرقمي' : 'Issue Digital Verification Seal'}</span>
                 {lang === 'ar' ? <ArrowLeft className="w-5 h-5 shrink-0" /> : <ArrowRight className="w-5 h-5 shrink-0" />}
               </button>
+
+              {/* MODULE 1: Disclaimer Banner under submit button */}
+              <div className="text-center p-4 bg-slate-100/90 rounded-2xl border border-slate-200/90 text-[11px] text-slate-600 font-medium leading-relaxed space-y-1">
+                <span className="font-extrabold text-slate-800 block">
+                  {lang === 'ar' ? '⚖️ تنبيه قانوني وتحديد نطاق التوثيق:' : '⚖️ Legal Notice & Scope Disclaimer:'}
+                </span>
+                <p>
+                  {lang === 'ar'
+                    ? 'تنبيه: توثيق مضمون يؤكد دقة بيانات التواصل، السجل التجاري، أو البيانات المالية المقدمة بحسب فئة التوثيق. التوثيق لا يشكل شراكة تجارية، ضماناً للمنتجات، أو تأييداً قانونياً لعمليات البيع.'
+                    : 'Notice: Verification by Madmoon confirms the accuracy of submitted contact identity, Commercial Registration, or financial account details corresponding to your tier. Verification does not constitute a joint venture, product warranty, or legal endorsement of sales transactions.'}
+                </p>
+              </div>
 
             </form>
           </div>
