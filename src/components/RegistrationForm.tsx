@@ -81,7 +81,7 @@ export const validateWebsiteUrl = (url: string, lang: Language): string | null =
 };
 
 export const validatePhone = (phoneRaw: string, country: CountryCode, lang: Language): string | null => {
-  const digits = phoneRaw.replace(/\D/g, '');
+  const digits = phoneRaw.replace(/\D/g, '').replace(/^0+/, '');
   if (!digits) return lang === 'ar' ? 'رقم الهاتف مطلوب لاستلام كود SMS' : 'Phone number is required for SMS OTP';
 
   if (country === 'JO') {
@@ -232,8 +232,9 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   };
 
   const selectedCountryInfo = COUNTRIES[country];
-  const formattedFullPhone = phone 
-    ? `${selectedCountryInfo.dialCode}${phone.replace(/\D/g, '')}` 
+  const cleanedPhone = phone.replace(/\D/g, '').replace(/^0+/, '');
+  const formattedFullPhone = cleanedPhone 
+    ? `${selectedCountryInfo.dialCode}${cleanedPhone}` 
     : `${selectedCountryInfo.dialCode}790000000`;
 
   // Step 1 Submit -> Validate strictly then move to OTP Step & Send Code
@@ -328,7 +329,16 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
         });
         (window as any).recaptchaVerifier = recaptcha;
 
-        const confirmation = await signInWithPhoneNumber(auth, formattedFullPhone, recaptcha);
+        await recaptcha.render();
+
+        // 20-second timeout race to prevent infinite hanging in "sending OTP" status
+        const phoneAuthPromise = signInWithPhoneNumber(auth, formattedFullPhone, recaptcha);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('SMS OTP request timed out. Please check network/Firebase configuration and try again.')), 20000);
+        });
+
+        const confirmation = await Promise.race([phoneAuthPromise, timeoutPromise]);
+
         setConfirmationResult(confirmation);
         setOtpSent(true);
         setIsDemoOtpFallback(false);
