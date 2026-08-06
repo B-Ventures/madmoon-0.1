@@ -74,17 +74,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [selectedStore, setSelectedStore] = useState<MerchantStore | null>(null);
   const [activeMenuStoreId, setActiveMenuStoreId] = useState<string | null>(null);
 
-  // Live DNS TXT verification state for the store inspection modal.
-  // This is advisory only - it does NOT gate approval and isn't persisted
-  // to Firestore, since the actual "domain matches" check already happens
-  // technically (badge.js compares the embedding page's real origin
-  // against the registered site), and this just gives the admin a real
-  // ownership signal alongside that instead of pure trust-on-click.
-  const [dnsCheckStatus, setDnsCheckStatus] = useState<'idle' | 'checking' | 'found' | 'not_found' | 'error'>('idle');
-
-  useEffect(() => {
-    setDnsCheckStatus('idle');
-  }, [selectedStore?.id]);
+  // Live DNS TXT verification status, keyed by store id, shared between the
+  // merchants table (checkable per-row before approving) and the store
+  // inspection modal. This is advisory only - it does NOT gate approval and
+  // isn't persisted to Firestore, since the actual "domain matches" check
+  // already happens technically (badge.js compares the embedding page's
+  // real origin against the registered site) - this just gives the admin a
+  // real ownership signal alongside that instead of pure trust-on-click.
+  const [dnsCheckStatus, setDnsCheckStatus] = useState<Record<string, 'checking' | 'found' | 'not_found' | 'error'>>({});
 
   const hostnameFromUrl = (url: string): string => {
     try {
@@ -96,7 +93,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleVerifyDnsTxt = async (store: MerchantStore) => {
-    setDnsCheckStatus('checking');
+    setDnsCheckStatus((prev) => ({ ...prev, [store.id]: 'checking' }));
     try {
       const domain = hostnameFromUrl(store.websiteUrl);
       const expected = `madmoon-verify=${store.verificationBadgeId || store.slug}`;
@@ -104,10 +101,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const data = await res.json();
       const answers: Array<{ data?: string }> = data.Answer || [];
       const found = answers.some((a) => (a.data || '').replace(/^"|"$/g, '') === expected);
-      setDnsCheckStatus(found ? 'found' : 'not_found');
+      setDnsCheckStatus((prev) => ({ ...prev, [store.id]: found ? 'found' : 'not_found' }));
     } catch (err) {
       console.error('DNS TXT verification failed:', err);
-      setDnsCheckStatus('error');
+      setDnsCheckStatus((prev) => ({ ...prev, [store.id]: 'error' }));
     }
   };
 
@@ -682,6 +679,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <td className="px-5 py-4 text-center">
                           <div className="flex items-center justify-center gap-2">
                             
+                            {/* Check domain ownership via DNS TXT before approving */}
+                            {status === 'pending' && (
+                              <button
+                                onClick={() => handleVerifyDnsTxt(store)}
+                                disabled={dnsCheckStatus[store.id] === 'checking'}
+                                title={lang === 'ar' ? 'التحقق من سجل DNS TXT لملكية النطاق قبل الاعتماد' : 'Check DNS TXT domain ownership before approving'}
+                                className={`p-1.5 rounded-xl border transition-all cursor-pointer disabled:opacity-50 shrink-0 ${
+                                  dnsCheckStatus[store.id] === 'found'
+                                    ? 'bg-emerald-50 border-emerald-300 text-[#047857]'
+                                    : dnsCheckStatus[store.id] === 'not_found'
+                                    ? 'bg-amber-50 border-amber-300 text-amber-700'
+                                    : dnsCheckStatus[store.id] === 'error'
+                                    ? 'bg-rose-50 border-rose-300 text-rose-700'
+                                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+                                }`}
+                              >
+                                {dnsCheckStatus[store.id] === 'checking' ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                ) : dnsCheckStatus[store.id] === 'found' ? (
+                                  <CheckCircle className="w-3.5 h-3.5" />
+                                ) : dnsCheckStatus[store.id] === 'not_found' ? (
+                                  <XCircle className="w-3.5 h-3.5" />
+                                ) : dnsCheckStatus[store.id] === 'error' ? (
+                                  <AlertTriangle className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Globe className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            )}
+
                             {/* Primary Action Button */}
                             {status === 'pending' ? (
                               <button
@@ -1029,26 +1056,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="flex items-center justify-between pt-1">
                 <button
                   onClick={() => handleVerifyDnsTxt(selectedStore)}
-                  disabled={dnsCheckStatus === 'checking'}
+                  disabled={dnsCheckStatus[selectedStore.id] === 'checking'}
                   className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${dnsCheckStatus === 'checking' ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${dnsCheckStatus[selectedStore.id] === 'checking' ? 'animate-spin' : ''}`} />
                   <span>{lang === 'ar' ? 'التحقق من السجل الآن' : 'Verify Record Now'}</span>
                 </button>
 
-                {dnsCheckStatus === 'found' && (
+                {dnsCheckStatus[selectedStore.id] === 'found' && (
                   <span className="text-[11px] font-extrabold text-[#047857] flex items-center gap-1.5">
                     <CheckCircle className="w-4 h-4" />
                     <span>{lang === 'ar' ? 'تم العثور على السجل - النطاق مملوك فعلياً' : 'Record found - domain ownership confirmed'}</span>
                   </span>
                 )}
-                {dnsCheckStatus === 'not_found' && (
+                {dnsCheckStatus[selectedStore.id] === 'not_found' && (
                   <span className="text-[11px] font-extrabold text-amber-700 flex items-center gap-1.5">
                     <XCircle className="w-4 h-4" />
                     <span>{lang === 'ar' ? 'لم يتم العثور على السجل بعد' : 'Record not found yet'}</span>
                   </span>
                 )}
-                {dnsCheckStatus === 'error' && (
+                {dnsCheckStatus[selectedStore.id] === 'error' && (
                   <span className="text-[11px] font-extrabold text-rose-700 flex items-center gap-1.5">
                     <AlertTriangle className="w-4 h-4" />
                     <span>{lang === 'ar' ? 'تعذر إجراء الفحص، حاول لاحقاً' : 'Could not run the check, try again later'}</span>
