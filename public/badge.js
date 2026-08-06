@@ -30,7 +30,9 @@
                     currentScript.getAttribute('data-slug') || 
                     currentScript.getAttribute('data-id') || 
                     'amman-artisans';
-  const position = currentScript.getAttribute('data-position') || 'bottom-right';
+  const position = currentScript.getAttribute('data-position') ||
+                   currentScript.getAttribute('data-placement') ||
+                   'bottom-right';
   const theme = currentScript.getAttribute('data-theme') || 'dark';
   const lang = currentScript.getAttribute('data-lang') || 'ar';
   const size = currentScript.getAttribute('data-size') || 'normal';
@@ -219,6 +221,10 @@
       const shadow = hostDiv.attachShadow({ mode: 'open' });
 
       // Scoped CSS
+      // Light theme uses a near-white background, so status text needs a
+      // dark color instead of the white used for the dark-theme gradient -
+      // otherwise it's unreadable (white on white).
+      const primaryTextColor = isDomainMismatch ? '#ffffff' : (theme === 'light' ? '#0f172a' : '#ffffff');
       const styleEl = document.createElement('style');
       styleEl.textContent = `
         :host {
@@ -252,7 +258,7 @@
             : (theme === 'light' 
               ? 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)' 
               : 'linear-gradient(135deg, #0f172a 0%, #022c22 100%)')};
-          color: #ffffff;
+          color: ${primaryTextColor};
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           font-size: ${size === 'compact' ? '12px' : '13px'};
@@ -312,7 +318,7 @@
           gap: 4px;
         }
         .madmoon-status {
-          color: #ffffff;
+          color: ${primaryTextColor};
           font-weight: 700;
           font-size: ${size === 'compact' ? '12px' : '13px'};
           white-space: nowrap;
