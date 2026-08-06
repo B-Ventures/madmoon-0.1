@@ -242,19 +242,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     showToast(lang === 'ar' ? `تم نسخ سجل DNS TXT: ${txtRecord}` : `DNS TXT Record copied: ${txtRecord}`);
   };
 
+  // Single source of truth for the embed snippet, matching the exact
+  // attribute names badge.js reads (data-store/data-placement/data-theme/
+  // data-lang - the same convention the registration wizard uses) and the
+  // merchant's own saved preferences where available, falling back to
+  // badge.js's own defaults for stores registered before these fields
+  // existed.
+  const buildEmbedSnippet = (store: MerchantStore, baseUrl: string) => {
+    const placement = store.badgePlacement || 'bottom-right';
+    const theme = store.badgeTheme || 'dark';
+    const badgeLang = store.badgeLang || 'ar';
+    return `<script src="${baseUrl}/badge.js" data-store="${store.slug}" data-placement="${placement}" data-theme="${theme}" data-lang="${badgeLang}" async></script>`;
+  };
+
   const handleResendWhatsAppSnippet = (store: MerchantStore) => {
     const baseUrl = window.location.origin;
+    const snippet = buildEmbedSnippet(store, baseUrl);
     const text = lang === 'ar'
-      ? `أهلاً ${store.ownerName || store.nameAr}، تم إصدار كود شارة مضمون لمتجرك (${store.websiteUrl}). الكود السريع:\n<script src="${baseUrl}/badge.js" data-id="${store.verificationBadgeId}" data-slug="${store.slug}"></script>`
-      : `Hello ${store.ownerName || store.nameEn}, your Madmoon badge snippet is ready for (${store.websiteUrl}):\n<script src="${baseUrl}/badge.js" data-id="${store.verificationBadgeId}" data-slug="${store.slug}"></script>`;
-    
+      ? `أهلاً ${store.ownerName || store.nameAr}، تم إصدار كود شارة مضمون لمتجرك (${store.websiteUrl}). الكود السريع:\n${snippet}`
+      : `Hello ${store.ownerName || store.nameEn}, your Madmoon badge snippet is ready for (${store.websiteUrl}):\n${snippet}`;
+
     navigator.clipboard.writeText(text);
     showToast(lang === 'ar' ? `تم تجهيز ونسخ كود الواتساب لـ ${store.phone}` : `WhatsApp snippet copied for ${store.phone}!`);
   };
 
   const handleCopyEmbedCode = (store: MerchantStore) => {
     const baseUrl = window.location.origin;
-    const snippet = `<script src="${baseUrl}/badge.js" data-badge-id="${store.verificationBadgeId}" data-slug="${store.slug}"></script>`;
+    const snippet = buildEmbedSnippet(store, baseUrl);
     navigator.clipboard.writeText(snippet);
     setCopiedId(store.id);
     setTimeout(() => setCopiedId(null), 2000);
@@ -993,7 +1007,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <pre className="bg-slate-900 text-emerald-300 p-3.5 rounded-xl text-[11px] font-mono whitespace-pre-wrap break-all dir-ltr">
-                {`<script src="${window.location.origin}/badge.js" data-badge-id="${selectedStore.verificationBadgeId}" data-slug="${selectedStore.slug}"></script>`}
+                {buildEmbedSnippet(selectedStore, window.location.origin)}
               </pre>
             </div>
 

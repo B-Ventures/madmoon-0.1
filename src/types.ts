@@ -48,6 +48,14 @@ export interface MerchantStore {
   verificationStatus?: 'pending' | 'active' | 'rejected';
   tier?: string;
   badgeStyle?: BadgeStyleOption;
+  // Merchant's chosen embed-script customization from the registration
+  // wizard (data-placement / data-theme / data-lang on badge.js). Persisted
+  // so Admin Dashboard can regenerate the same snippet later instead of
+  // silently falling back to defaults that may not match what the merchant
+  // originally set up.
+  badgePlacement?: 'bottom-right' | 'bottom-left' | 'inline';
+  badgeTheme?: 'light' | 'dark';
+  badgeLang?: 'ar' | 'en';
   createdAt?: string;
 }
 
