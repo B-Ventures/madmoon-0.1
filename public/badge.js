@@ -155,7 +155,7 @@
       .then(function (storeData) {
         if (!storeData) {
           if (slug === 'amman-artisans' || slug === 'store-amman-artisans') {
-            return { showBadge: true, verificationStatus: 'active', tier: 'منشأة مسجلة - Tier 2', domainVerified: true };
+            return { showBadge: true, verificationStatus: 'active', sellerType: 'business', domainVerified: true };
           }
           return { showBadge: false, reason: 'store_not_found' };
         }
@@ -185,7 +185,6 @@
         return {
           showBadge: true,
           verificationStatus: 'active',
-          tier: storeData.tier || (storeData.sellerType === 'business' ? 'منشأة مسجلة' : 'هوية شخصية مؤكدة'),
           sellerType: storeData.sellerType || 'individual',
           nameAr: storeData.nameAr,
           nameEn: storeData.nameEn,
@@ -342,9 +341,16 @@
         ? (lang === 'ar' ? '🔴 تنبيه أمني: عدم تطابق النطاق - انقر لمعرفة التفاصيل' : '🔴 Security Warning: Domain Mismatch - Click for details')
         : (lang === 'ar' ? 'عرض شهادة التوثيق الرسمية على منصة مضمون' : 'View Official Verification Certificate on Madmoon');
 
+      // Derived from sellerType + this widget's own `lang`, NOT data.tier -
+      // that field is a display string pre-formatted in whatever language
+      // the admin's dashboard happened to be in at approval time, so using
+      // it directly would ignore data-lang and always show that one
+      // language regardless of what the merchant configured their badge as.
       const tierDisplay = isDomainMismatch
         ? (lang === 'ar' ? '🔴 نطاق غير موثق / مصدر غير مصرح' : '🔴 Unverified Domain Mismatch')
-        : (data.tier || (lang === 'ar' ? 'متجر مضمون' : 'Verified Identity Store'));
+        : (data.sellerType === 'business'
+          ? (lang === 'ar' ? 'مستوى 2: منشأة مسجلة' : 'Level 2: Registered Entity')
+          : (lang === 'ar' ? 'مستوى 1: هوية مؤكدة' : 'Level 1: Verified Identity'));
 
       const iconSvg = isDomainMismatch
         ? `<svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`

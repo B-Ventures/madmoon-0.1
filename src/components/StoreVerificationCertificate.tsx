@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2, ExternalLink, AlertTriangle, Share2, Building2, Globe, Phone, FileText, Calendar, Eye, Lock, ArrowLeft, ArrowRight, Check, Flag, Clock, XCircle } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, ExternalLink, AlertTriangle, Share2, Building2, Globe, Phone, FileText, Calendar, Eye, Lock, ArrowLeft, ArrowRight, Check, Flag, Clock, XCircle, Tag } from 'lucide-react';
 import { Language, MerchantStore } from '../types';
 import { translations } from '../translations';
 import { COUNTRIES } from '../data/countries';
@@ -106,7 +106,7 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
                 <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider">
                   {lang === 'ar' ? 'السجل العام التجاري' : 'PUBLIC TRUST REGISTRY'}
                 </span>
-                <p className="text-xs font-bold text-slate-500 font-mono">MADMOON-JO-AUTH</p>
+                <p className="text-xs font-bold text-slate-500 font-mono">MADMOON-{store.country}-AUTH</p>
               </div>
 
               {/* Official Seal Stamp Icon */}
@@ -244,8 +244,60 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
 
           {/* VERIFICATION DETAILS TABLE GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
-            
-            {/* Field 1: CR Number / Seller Identity */}
+
+            {/* Field: Legal Structure & Registration */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
+              <div className={`p-2.5 rounded-lg border shrink-0 ${
+                isRejected
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : isPending
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
+                <Flag className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-slate-500 block">
+                  {lang === 'ar' ? 'الشكل القانوني والتسجيل' : 'Legal Structure & Registration'}
+                </span>
+                <span className="text-sm font-black text-slate-900 block mt-0.5">
+                  {isBusiness
+                    ? (lang === 'ar' ? 'منشأة مسجلة / شركة / مؤسسة' : 'Registered Business / Entity / CR')
+                    : (lang === 'ar' ? 'عمل حر / صانع محتوى / فردي' : 'Individual / Creator / Freelancer')}
+                </span>
+              </div>
+            </div>
+
+            {/* Field: Business Vertical / Sector */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
+              <div className={`p-2.5 rounded-lg border shrink-0 ${
+                isRejected
+                  ? 'bg-rose-50 text-rose-700 border-rose-200'
+                  : isPending
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
+                <Tag className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-slate-500 block">
+                  {t.categoryLabel}
+                </span>
+                <span className="text-sm font-black text-slate-900 block mt-0.5">
+                  {{
+                    fashion: t.catFashion,
+                    electronics: t.catElectronics,
+                    crafts: t.catCrafts,
+                    beauty: t.catBeauty,
+                    food: t.catFood,
+                    services: t.catServices,
+                    general: t.catGeneral
+                  }[store.category] || t.catGeneral}
+                </span>
+              </div>
+            </div>
+
+            {/* Field: CR Number / Seller Identity */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-start gap-3">
               <div className={`p-2.5 rounded-lg border shrink-0 ${
                 isRejected
@@ -394,16 +446,11 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
 
           </div>
 
-          {/* Certificate Footer Signoff */}
-          <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-600">
-            <div>
-              <p className="font-extrabold text-slate-900">سجل مضمون التجاري العام | Madmoon Trust Authority</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">{window.location.origin}</p>
-            </div>
-
-            <div className="text-right sm:text-left font-mono text-[11px] text-slate-500">
-              ID: {store.verificationBadgeId}
-            </div>
+          {/* Certificate Footer Signoff - badge ID isn't repeated here, it's
+              already shown once as REF: at the top of the page */}
+          <div className="pt-6 border-t border-slate-200 text-xs font-medium text-slate-600">
+            <p className="font-extrabold text-slate-900">سجل مضمون التجاري العام | Madmoon Trust Authority</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{window.location.origin}</p>
           </div>
 
         </div>
