@@ -27,6 +27,24 @@
   </head>
   <body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-emerald-500 selection:text-white min-h-screen">
     <div id="root"></div>
+
+    <!-- Single Page Apps for GitHub Pages: restores the real deep-link URL
+         that public/404.html encoded into ?p=<path>&q=<query> before
+         redirecting here. Must run before src/main.tsx so App.tsx's
+         parseRouteFromUrl() sees the real path, not "/". -->
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var encodedPath = params.get('p');
+        if (encodedPath) {
+          var encodedQuery = params.get('q');
+          var restoredPath = '/' + encodedPath.replace(/~and~/g, '&');
+          var restoredSearch = encodedQuery ? '?' + encodedQuery.replace(/~and~/g, '&') : '';
+          window.history.replaceState(null, '', restoredPath + restoredSearch + window.location.hash);
+        }
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
 
     <!-- PWA Service Worker Registration -->
