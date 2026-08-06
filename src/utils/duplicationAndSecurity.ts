@@ -49,16 +49,18 @@ export function normalizePhone(phone: string, countryCode: CountryCode): string 
 }
 
 /**
- * Sanitizes user input string against HTML/XSS injection attempts
+ * Strips characters that have no legitimate place in a store/owner name
+ * (angle brackets, control characters). Deliberately does NOT HTML-entity
+ * encode: every place this value is displayed goes through React JSX
+ * (auto-escaped on render) or plain-text messages, never
+ * dangerouslySetInnerHTML — entity-encoding here would just show up as
+ * literal "&#x27;" etc. in the UI for names containing an apostrophe.
  */
 export function sanitizeInput(text: string): string {
   if (!text) return '';
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[<>\x00-\x1F\x7F]/g, '')
     .trim();
 }
 

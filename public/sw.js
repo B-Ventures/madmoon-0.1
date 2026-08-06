@@ -1,8 +1,8 @@
-const CACHE_NAME = 'madmoon-pwa-v3';
+const CACHE_NAME = 'madmoon-pwa-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json',
+  './site.webmanifest',
   './badge.js',
   './icon.svg'
 ];

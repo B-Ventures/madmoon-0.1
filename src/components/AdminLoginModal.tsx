@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, ShieldCheck, Mail, Key, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Language } from '../types';
-import { signInWithEmailAndPassword, auth } from '../firebase';
+import { signInWithEmailAndPassword, signOut, auth, checkIsAdmin } from '../firebase';
 
 interface AdminLoginModalProps {
   lang: Language;
@@ -38,7 +38,23 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
     try {
       // Sign in existing admin user on Firebase Auth
-      await signInWithEmailAndPassword(auth, cleanEmail, password);
+      const cred = await signInWithEmailAndPassword(auth, cleanEmail, password);
+
+      // Firebase Auth success alone does not mean admin access — the
+      // "admin" custom claim is the actual source of truth (see
+      // firestore.rules isAdmin()). Bounce non-admin accounts out.
+      const isAdmin = await checkIsAdmin(cred.user);
+      if (!isAdmin) {
+        await signOut(auth);
+        setError(
+          lang === 'ar'
+            ? 'هذا الحساب غير مخوّل بصلاحيات الوصول للوحة الإدارة.'
+            : 'This account does not have admin dashboard privileges.'
+        );
+        setLoading(false);
+        return;
+      }
+
       onLoginSuccess();
     } catch (err: any) {
       console.error('Firebase Auth Admin Error:', err);

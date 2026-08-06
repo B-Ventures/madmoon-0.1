@@ -1,15 +1,15 @@
-import { initializeApp, getApps, getApp, deleteApp } from 'firebase/app';
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  signOut, 
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   type ConfirmationResult,
-  User 
+  User
 } from 'firebase/auth';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { 
   getFirestore, 
   initializeFirestore,
@@ -47,6 +47,28 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Auth
 export const auth = getAuth(app);
+
+// Initialize Cloud Functions (used for admin-only server-side operations)
+export const functions = getFunctions(app);
+
+/**
+ * Checks whether the currently signed-in user carries the "admin" custom
+ * claim. This is the ONLY source of truth for admin access — merely being
+ * signed in to Firebase Auth is not enough (see firestore.rules isAdmin()).
+ * Forces a token refresh so a claim granted moments ago (e.g. via
+ * grantInitialAdmin.js) is picked up without waiting for the SDK's normal
+ * hourly refresh.
+ */
+export async function checkIsAdmin(user: User | null): Promise<boolean> {
+  if (!user) return false;
+  try {
+    const tokenResult = await user.getIdTokenResult(true);
+    return tokenResult.claims.admin === true;
+  } catch (error) {
+    console.warn('Failed to read admin claim:', error);
+    return false;
+  }
+}
 
 // Initialize Firestore with database ID & force long polling for restricted iframe/network environments
 const dbId = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)' 
@@ -250,25 +272,22 @@ export async function updateReportStatusInFirestore(reportId: string, status: 'p
 }
 
 /**
- * Creates a secondary admin user on Firebase Auth without disturbing active primary admin session
+ * Creates a new admin user account via the createAdminUser Cloud Function.
+ * Requires the caller to already be signed in with the admin custom claim —
+ * enforced server-side, since only the Admin SDK can grant that claim.
  */
-export async function createSecondaryAdminAccount(email: string, pass: string) {
-  const secondaryAppName = `AdminProvision_${Date.now()}`;
-  const secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
-  const secondaryAuth = getAuth(secondaryApp);
-  try {
-    const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
-    await signOut(secondaryAuth);
-    return userCred.user;
-  } finally {
-    await deleteApp(secondaryApp).catch(console.warn);
-  }
+export async function createAdminAccount(email: string, pass: string) {
+  const callable = httpsCallable<{ email: string; password: string }, { uid: string; email: string }>(
+    functions,
+    'createAdminUser'
+  );
+  const result = await callable({ email, password: pass });
+  return result.data;
 }
 
-export { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  signOut, 
+export {
+  signInWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber
