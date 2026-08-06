@@ -106,7 +106,7 @@ export const StoreVerificationCertificate: React.FC<StoreVerificationCertificate
                 <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider">
                   {lang === 'ar' ? 'السجل العام التجاري' : 'PUBLIC TRUST REGISTRY'}
                 </span>
-                <p className="text-xs font-bold text-slate-500 font-mono">MADMOON-JO-AUTH</p>
+                <p className="text-xs font-bold text-slate-500 font-mono">MADMOON-{store.country}-AUTH</p>
               </div>
 
               {/* Official Seal Stamp Icon */}
