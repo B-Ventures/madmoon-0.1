@@ -19,12 +19,20 @@ service cloud.firestore {
         && request.resource.data.crVerified == false;
     }
 
-    // Public click tracking is only allowed to touch clickCount, and only
-    // to increment it by exactly one at a time.
-    function isClickCountIncrement() {
+    // Public writes to an existing merchant doc are limited to a narrow
+    // allowlist of low-stakes, non-trust fields:
+    //  - clickCount: badge-click tracking, but only by exactly +1 at a time
+    //  - badgePlacement/badgeTheme/badgeLang: the merchant's own embed
+    //    widget display preferences (registration wizard step 3), purely
+    //    cosmetic - not a verification/trust signal, unlike
+    //    verificationStatus/domainVerified/crVerified/tier which remain
+    //    admin-only via the base update rule.
+    function isSafePublicUpdate() {
       let diffKeys = request.resource.data.diff(resource.data).affectedKeys();
-      return diffKeys.hasOnly(['clickCount'])
-        && request.resource.data.clickCount == resource.data.clickCount + 1;
+      let clickCountOk = !diffKeys.hasAny(['clickCount'])
+        || request.resource.data.clickCount == resource.data.clickCount + 1;
+      return diffKeys.hasOnly(['clickCount', 'badgePlacement', 'badgeTheme', 'badgeLang'])
+        && clickCountOk;
     }
 
     // Merchants Collection Rules
@@ -37,9 +45,10 @@ service cloud.firestore {
       // records directly (e.g. seeding/import).
       allow create: if isAdmin() || isUnverifiedSubmission();
 
-      // Public may only bump the click counter. Approving, rejecting, or
-      // changing verification/tier fields requires an admin.
-      allow update: if isAdmin() || isClickCountIncrement();
+      // Public may only bump the click counter or update their own badge
+      // display prefs. Approving, rejecting, or changing verification/tier
+      // fields requires an admin.
+      allow update: if isAdmin() || isSafePublicUpdate();
 
       // Only authenticated admin can delete merchant records
       allow delete: if isAdmin();

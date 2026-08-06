@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MadmoonLogo } from './MadmoonLogo';
 import { 
   ShieldCheck, 
@@ -27,7 +27,7 @@ import {
 import { Language, MerchantStore, CountryCode, StoreCategory } from '../types';
 import { translations } from '../translations';
 import { COUNTRIES } from '../data/countries';
-import { addMerchantToFirestore, auth, RecaptchaVerifier, signInWithPhoneNumber } from '../firebase';
+import { addMerchantToFirestore, updateMerchantBadgeConfigInFirestore, auth, RecaptchaVerifier, signInWithPhoneNumber } from '../firebase';
 import type { ConfirmationResult } from 'firebase/auth';
 import { 
   checkBusinessDuplication, 
@@ -214,6 +214,23 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   // same language they happened to be browsing this registration wizard in.
   const [badgeLang, setBadgeLang] = useState<'ar' | 'en'>(lang);
   const [copied, setCopied] = useState(false);
+
+  // The store doc is created (with these fields' initial values) before the
+  // merchant ever sees this step's selectors, so keep Firestore in sync as
+  // they adjust placement/theme/language here - otherwise their choice only
+  // ever lived in this component's local state and would be lost the moment
+  // they navigate away, leaving Admin Dashboard with nothing but defaults
+  // to regenerate the snippet from later.
+  useEffect(() => {
+    if (step === 'success' && createdStore) {
+      updateMerchantBadgeConfigInFirestore(createdStore.id, {
+        badgePlacement: placement,
+        badgeTheme: theme,
+        badgeLang: badgeLang
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placement, theme, badgeLang, step, createdStore?.id]);
 
   // Computed field validation errors
   const storeNameErr = validateStoreName(storeName, lang);
@@ -476,6 +493,9 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
         isSample: false,
         tier: sellerType === 'business' ? 'منشأة مسجلة - Tier 2' : 'هوية شخصية مؤكدة - Tier 1',
         badgeStyle: 'floating-pill',
+        badgePlacement: placement,
+        badgeTheme: theme,
+        badgeLang: badgeLang,
         createdAt: new Date().toISOString()
       };
 

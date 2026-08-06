@@ -24,6 +24,9 @@
         "clickCount": { "type": "number" },
         "reportCount": { "type": "number" },
         "ownerName": { "type": "string" },
+        "badgePlacement": { "type": "string", "enum": ["bottom-right", "bottom-left", "inline"] },
+        "badgeTheme": { "type": "string", "enum": ["light", "dark"] },
+        "badgeLang": { "type": "string", "enum": ["ar", "en"] },
         "createdAt": { "type": "string" }
       },
       "required": ["slug", "nameAr", "websiteUrl", "commercialReg"]
@@ -52,7 +55,7 @@
       "security": {
         "read": "true",
         "create": "isAdmin() || submission starts as verificationStatus=pending/domainVerified=false/crVerified=false",
-        "update": "isAdmin() || public may only increment clickCount by 1",
+        "update": "isAdmin() || public may only increment clickCount by 1 and/or set badgePlacement/badgeTheme/badgeLang",
         "delete": "isAdmin() (request.auth.token.admin == true)"
       }
     },

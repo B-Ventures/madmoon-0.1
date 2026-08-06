@@ -246,6 +246,24 @@ export async function incrementClickCountInFirestore(storeId: string, currentCli
 }
 
 /**
+ * Persist the merchant's own badge embed-widget display preferences
+ * (placement/theme/language, chosen in the registration wizard step 3).
+ * Allowed as a public write by firestore.rules - purely cosmetic, not a
+ * trust/verification signal.
+ */
+export async function updateMerchantBadgeConfigInFirestore(
+  storeId: string,
+  config: { badgePlacement?: 'bottom-right' | 'bottom-left' | 'inline'; badgeTheme?: 'light' | 'dark'; badgeLang?: 'ar' | 'en' }
+) {
+  try {
+    const storeRef = doc(db, 'merchants', storeId);
+    await updateDoc(storeRef, config);
+  } catch (error) {
+    console.warn('Error updating merchant badge config in Firestore:', error);
+  }
+}
+
+/**
  * Submit dispute report to Firestore
  */
 export async function addReportToFirestore(report: DisputeReport) {
