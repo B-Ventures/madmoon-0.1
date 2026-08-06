@@ -1,6 +1,12 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const axios = require("axios");
+const admin = require("firebase-admin");
+
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 /**
  * Firebase Cloud Function (v2) triggered when a new merchant is created in Firestore.
@@ -99,3 +105,52 @@ ${snippetCode}
     }
   }
 );
+
+/**
+ * Callable Cloud Function: createAdminUser
+ *
+ * Creates a new Firebase Auth user and grants it the "admin" custom claim
+ * used by firestore.rules' isAdmin() check. Only callable by an already
+ * signed-in caller who themselves carries the admin claim — this is the
+ * ONLY supported way to mint additional admins. Client-side
+ * createUserWithEmailAndPassword() intentionally does NOT grant this claim,
+ * since anyone can call it from the browser console with the public
+ * Firebase Web config.
+ *
+ * The very first admin cannot be created this way (no admin exists yet to
+ * call it) — use scripts/grantInitialAdmin.js once, out-of-band, instead.
+ */
+exports.createAdminUser = onCall(async (request) => {
+  if (!request.auth || request.auth.token.admin !== true) {
+    throw new HttpsError(
+      "permission-denied",
+      "Only an existing admin may create another admin account."
+    );
+  }
+
+  const email = String(request.data?.email || "").trim().toLowerCase();
+  const password = String(request.data?.password || "");
+
+  if (!email || !password) {
+    throw new HttpsError("invalid-argument", "email and password are required.");
+  }
+  if (password.length < 6) {
+    throw new HttpsError("invalid-argument", "password must be at least 6 characters.");
+  }
+
+  try {
+    const userRecord = await admin.auth().createUser({ email, password });
+    await admin.auth().setCustomUserClaims(userRecord.uid, { admin: true });
+    logger.info("Created new admin user", { uid: userRecord.uid, email, byUid: request.auth.uid });
+    return { uid: userRecord.uid, email };
+  } catch (error) {
+    logger.error("Failed to create admin user", { email, errorMessage: error.message });
+    if (error.code === "auth/email-already-exists") {
+      throw new HttpsError("already-exists", "This email is already registered.");
+    }
+    if (error.code === "auth/invalid-password") {
+      throw new HttpsError("invalid-argument", "Password does not meet Firebase requirements.");
+    }
+    throw new HttpsError("internal", error.message || "Failed to create admin user.");
+  }
+});

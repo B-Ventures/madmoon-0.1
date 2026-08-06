@@ -51,18 +51,18 @@
       "entity": "Merchant",
       "security": {
         "read": "true",
-        "create": "true",
-        "update": "true",
-        "delete": "request.auth != null"
+        "create": "isAdmin() || submission starts as verificationStatus=pending/domainVerified=false/crVerified=false",
+        "update": "isAdmin() || public may only increment clickCount by 1",
+        "delete": "isAdmin() (request.auth.token.admin == true)"
       }
     },
     "reports/{reportId}": {
       "entity": "Report",
       "security": {
         "read": "true",
-        "create": "true",
-        "update": "true",
-        "delete": "request.auth != null"
+        "create": "isAdmin() || submission starts as status=pending",
+        "update": "isAdmin() (request.auth.token.admin == true)",
+        "delete": "isAdmin() (request.auth.token.admin == true)"
       }
     }
   }

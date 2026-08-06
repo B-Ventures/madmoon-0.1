@@ -45,7 +45,7 @@ import {
   seedInitialStoresIfEmpty,
   signOut,
   auth,
-  createSecondaryAdminAccount
+  createAdminAccount
 } from '../firebase';
 
 interface AdminDashboardProps {
@@ -108,7 +108,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
 
     try {
-      await createSecondaryAdminAccount(cleanEmail, newAdminPassword);
+      await createAdminAccount(cleanEmail, newAdminPassword);
       showToast(
         lang === 'ar'
           ? `[ ✓ تم تسجيل مسؤول جديد ] (${cleanEmail}) بنجاح على Firebase`
@@ -120,18 +120,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     } catch (err: any) {
       console.error('Create admin error:', err);
       let msg = err?.message || '';
-      if (err?.code === 'auth/email-already-in-use') {
+      if (err?.code === 'functions/already-exists') {
         msg = lang === 'ar'
           ? 'هذا البريد الإلكتروني مسجل بالفعل كمسؤول في Firebase Auth.'
           : 'This email is already registered on Firebase Auth.';
-      } else if (err?.code === 'auth/invalid-email') {
+      } else if (err?.code === 'functions/invalid-argument') {
         msg = lang === 'ar'
-          ? 'صيغة البريد الإلكتروني غير صحيحة.'
-          : 'Invalid email address format.';
-      } else if (err?.code === 'auth/weak-password') {
+          ? 'يرجى التأكد من صحة البريد الإلكتروني وكلمة المرور (6 خانات على الأقل).'
+          : 'Please check the email format and password (min 6 characters).';
+      } else if (err?.code === 'functions/permission-denied') {
         msg = lang === 'ar'
-          ? 'كلمة المرور ضعيفة جداً (يجب ألا تقل عن 6 خانات).'
-          : 'Password is too weak (must be at least 6 characters).';
+          ? 'حسابك الحالي لا يملك صلاحية إضافة مسؤولين جدد.'
+          : 'Your account does not have permission to create new admins.';
       }
       setAddAdminError(msg);
     } finally {

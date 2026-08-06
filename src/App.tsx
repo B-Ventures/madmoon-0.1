@@ -29,13 +29,14 @@ import {
   X, 
   Lock 
 } from 'lucide-react';
-import { 
-  auth, 
-  onAuthStateChanged, 
+import {
+  auth,
+  onAuthStateChanged,
   signOut,
-  subscribeToMerchants, 
+  subscribeToMerchants,
   incrementClickCountInFirestore,
-  seedInitialStoresIfEmpty
+  seedInitialStoresIfEmpty,
+  checkIsAdmin
 } from './firebase';
 
 const parseRouteFromUrl = (): { tab: ViewTab; slug: string | null } => {
@@ -189,17 +190,12 @@ export default function App() {
     setDeferredPrompt(null);
   };
 
-  // Firebase Auth listener
+  // Firebase Auth listener — admin access requires the "admin" custom
+  // claim, not merely being signed in (see firestore.rules isAdmin()).
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsAdminAuthenticated(true);
-      } else {
-        const localAdmin = localStorage.getItem('madmoon_admin_logged');
-        if (localAdmin === 'true') {
-          setIsAdminAuthenticated(true);
-        }
-      }
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      const isAdmin = await checkIsAdmin(user);
+      setIsAdminAuthenticated(isAdmin);
     });
     return () => unsub();
   }, []);
@@ -284,13 +280,11 @@ export default function App() {
 
   const handleAdminLoginSuccess = () => {
     setIsAdminAuthenticated(true);
-    localStorage.setItem('madmoon_admin_logged', 'true');
   };
 
   const handleAdminLogout = () => {
     signOut(auth).catch(console.warn);
     setIsAdminAuthenticated(false);
-    localStorage.removeItem('madmoon_admin_logged');
     setActiveTab('home');
   };
 
