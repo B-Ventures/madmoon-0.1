@@ -30,7 +30,9 @@
                     currentScript.getAttribute('data-slug') || 
                     currentScript.getAttribute('data-id') || 
                     'amman-artisans';
-  const position = currentScript.getAttribute('data-position') || 'bottom-right';
+  const position = currentScript.getAttribute('data-position') ||
+                   currentScript.getAttribute('data-placement') ||
+                   'bottom-right';
   const theme = currentScript.getAttribute('data-theme') || 'dark';
   const lang = currentScript.getAttribute('data-lang') || 'ar';
   const size = currentScript.getAttribute('data-size') || 'normal';
@@ -219,6 +221,10 @@
       const shadow = hostDiv.attachShadow({ mode: 'open' });
 
       // Scoped CSS
+      // Light theme uses a near-white background, so status text needs a
+      // dark color instead of the white used for the dark-theme gradient -
+      // otherwise it's unreadable (white on white).
+      const primaryTextColor = isDomainMismatch ? '#ffffff' : (theme === 'light' ? '#0f172a' : '#ffffff');
       const styleEl = document.createElement('style');
       styleEl.textContent = `
         :host {
@@ -226,7 +232,6 @@
           font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           box-sizing: border-box;
           direction: ${lang === 'ar' ? 'rtl' : 'ltr'};
-          z-index: 999999;
         }
         * {
           box-sizing: border-box;
@@ -237,6 +242,12 @@
           display: inline-flex;
           align-items: center;
           gap: 10px;
+          /* Sits above typical page chrome (sticky headers/navs) without
+             going to an absurd extreme - same range widely-used chat
+             widgets (Intercom, Crisp, etc.) use for their launcher. Only
+             matters for the floating pos-bottom-right/pos-bottom-left
+             variants; pos-inline stays in normal document flow. */
+          z-index: 999999;
           padding: 10px 16px;
           border-radius: 9999px;
           cursor: pointer;
@@ -252,7 +263,7 @@
             : (theme === 'light' 
               ? 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)' 
               : 'linear-gradient(135deg, #0f172a 0%, #022c22 100%)')};
-          color: #ffffff;
+          color: ${primaryTextColor};
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           font-size: ${size === 'compact' ? '12px' : '13px'};
@@ -312,7 +323,7 @@
           gap: 4px;
         }
         .madmoon-status {
-          color: #ffffff;
+          color: ${primaryTextColor};
           font-weight: 700;
           font-size: ${size === 'compact' ? '12px' : '13px'};
           white-space: nowrap;
