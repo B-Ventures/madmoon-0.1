@@ -1,6 +1,6 @@
 /**
  * Madmoon Trust Badge Embed Script
- * @version 2.0.0 (Smart Admin Gate & Domain Verification)
+ * @version 2.1.0 (Direct Firestore Status Lookup - no server required)
  * @license Apache-2.0
  * 
  * Usage:
@@ -47,11 +47,154 @@
   }
   const verifyUrl = `${baseUrl}/?verify=${encodeURIComponent(storeSlug)}#verify`;
 
-  // Query Backend Merchant Status API
-  const statusApiUrl = `${baseUrl}/api/merchant-status?slug=${encodeURIComponent(storeSlug)}&referrer=${encodeURIComponent(window.location.origin || document.referrer || '')}`;
+  // Resolve merchant status directly from Firestore's public REST API.
+  // This domain is hosted on GitHub Pages (static-only), which cannot run
+  // the Express /api/merchant-status proxy server.ts defines - so this
+  // widget reads Firestore itself instead of depending on a server that
+  // isn't actually deployed here. Firestore's read rules already allow
+  // public reads on the merchants collection (allow read: if true), and
+  // this is a plain REST call - no Firebase SDK needed, keeps this embed
+  // script small.
+  const FIREBASE_PROJECT_ID = 'gen-lang-client-0823624253';
+  const FIREBASE_API_KEY = 'AIzaSyAMGwz1YTFp7pzSJhteSde8AclK-uaBAhk';
+  const FIRESTORE_DATABASE_ID = 'ai-studio-madmoontrustbadg-65b6ef74-b70b-422d-8cd7-631c2d824590';
+  const FIRESTORE_DOCS_URL = 'https://firestore.googleapis.com/v1/projects/' + FIREBASE_PROJECT_ID +
+    '/databases/' + FIRESTORE_DATABASE_ID + '/documents';
 
-  fetch(statusApiUrl)
-    .then(function(res) { return res.json(); })
+  // Unwraps Firestore REST's typed field format ({ stringValue: "x" }, etc.)
+  // into a plain JS object.
+  function firestoreValueToJs(value) {
+    if (value == null) return null;
+    if ('stringValue' in value) return value.stringValue;
+    if ('booleanValue' in value) return value.booleanValue;
+    if ('integerValue' in value) return parseInt(value.integerValue, 10);
+    if ('doubleValue' in value) return value.doubleValue;
+    if ('mapValue' in value) return firestoreFieldsToJs((value.mapValue && value.mapValue.fields) || {});
+    if ('arrayValue' in value) return ((value.arrayValue && value.arrayValue.values) || []).map(firestoreValueToJs);
+    return null;
+  }
+  function firestoreFieldsToJs(fields) {
+    const out = {};
+    for (const key in fields) {
+      if (Object.prototype.hasOwnProperty.call(fields, key)) {
+        out[key] = firestoreValueToJs(fields[key]);
+      }
+    }
+    return out;
+  }
+
+  // Mirrors server.ts's direct-doc-ID lookup (merchants/store-{slug}).
+  function fetchMerchantDocDirect(docId) {
+    const url = FIRESTORE_DOCS_URL + '/merchants/' + encodeURIComponent(docId) + '?key=' + FIREBASE_API_KEY;
+    return fetch(url)
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (doc) { return doc && doc.fields ? firestoreFieldsToJs(doc.fields) : null; })
+      .catch(function () { return null; });
+  }
+
+  // Mirrors server.ts's fallback query on the `slug` field when the doc ID
+  // guess above doesn't match.
+  function fetchMerchantBySlugQuery(slug) {
+    const url = FIRESTORE_DOCS_URL + ':runQuery?key=' + FIREBASE_API_KEY;
+    const body = {
+      structuredQuery: {
+        from: [{ collectionId: 'merchants' }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: 'slug' },
+            op: 'EQUAL',
+            value: { stringValue: slug }
+          }
+        },
+        limit: 1
+      }
+    };
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (results) {
+        if (!Array.isArray(results)) return null;
+        for (let i = 0; i < results.length; i++) {
+          if (results[i] && results[i].document && results[i].document.fields) {
+            return firestoreFieldsToJs(results[i].document.fields);
+          }
+        }
+        return null;
+      })
+      .catch(function () { return null; });
+  }
+
+  // Same domain-normalization logic as server.ts's extractDomain().
+  function extractDomain(urlStr) {
+    if (!urlStr) return '';
+    try {
+      let formatted = urlStr.trim();
+      if (formatted.indexOf('http://') !== 0 && formatted.indexOf('https://') !== 0) {
+        formatted = 'https://' + formatted;
+      }
+      const parsed = new URL(formatted);
+      return parsed.hostname.toLowerCase().replace(/^www\./, '');
+    } catch (e) {
+      return urlStr.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+    }
+  }
+
+  // Same admin-gate + domain-verification decision logic that used to live
+  // in server.ts's /api/merchant-status handler, now run client-side.
+  function resolveMerchantStatus(slug, incomingOrigin) {
+    const incomingDomain = extractDomain(incomingOrigin);
+    const directDocId = slug.indexOf('store-') === 0 ? slug : ('store-' + slug);
+
+    return fetchMerchantDocDirect(directDocId)
+      .then(function (storeData) { return storeData || fetchMerchantBySlugQuery(slug); })
+      .then(function (storeData) {
+        if (!storeData) {
+          if (slug === 'amman-artisans' || slug === 'store-amman-artisans') {
+            return { showBadge: true, verificationStatus: 'active', tier: 'منشأة مسجلة - Tier 2', domainVerified: true };
+          }
+          return { showBadge: false, reason: 'store_not_found' };
+        }
+
+        const verificationStatus = storeData.verificationStatus || (storeData.domainVerified ? 'active' : 'pending');
+        const storeDomain = extractDomain(storeData.websiteUrl);
+
+        if (verificationStatus !== 'active') {
+          return { showBadge: false, reason: 'pending_approval', verificationStatus: verificationStatus };
+        }
+
+        const isDevPreview = incomingDomain.indexOf('localhost') !== -1 || incomingDomain.indexOf('run.app') !== -1 || incomingDomain === '';
+        const domainMatches = isDevPreview || incomingDomain === storeDomain ||
+          incomingDomain.endsWith('.' + storeDomain) || storeDomain.endsWith('.' + incomingDomain);
+
+        if (!domainMatches) {
+          return {
+            showBadge: false,
+            showWarningBadge: true,
+            reason: 'domain_mismatch',
+            verificationStatus: 'active',
+            registeredDomain: storeDomain,
+            requestDomain: incomingDomain
+          };
+        }
+
+        return {
+          showBadge: true,
+          verificationStatus: 'active',
+          tier: storeData.tier || (storeData.sellerType === 'business' ? 'منشأة مسجلة' : 'هوية شخصية مؤكدة'),
+          sellerType: storeData.sellerType || 'individual',
+          nameAr: storeData.nameAr,
+          nameEn: storeData.nameEn,
+          badgeId: storeData.verificationBadgeId,
+          domainVerified: true
+        };
+      })
+      .catch(function () { return { showBadge: false, reason: 'lookup_failed' }; });
+  }
+
+  resolveMerchantStatus(storeSlug, window.location.origin || document.referrer || '')
     .then(function(data) {
       // MODULE 4: Instant Revocation Check
       // If store is suspended, pending, rejected, or invalid (and not domain_mismatch), EXIT IMMEDIATELY and render NOTHING.
