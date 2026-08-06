@@ -207,8 +207,12 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   const [createdStore, setCreatedStore] = useState<MerchantStore | null>(null);
 
   // Customization Options for Step 3
-  const [placement, setPlacement] = useState<'bottom-right' | 'bottom-left'>('bottom-right');
+  const [placement, setPlacement] = useState<'bottom-right' | 'bottom-left' | 'inline'>('bottom-right');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  // Badge's own display language - independent from `lang` (the Madmoon
+  // site's own UI language), since a merchant's site may not be in the
+  // same language they happened to be browsing this registration wizard in.
+  const [badgeLang, setBadgeLang] = useState<'ar' | 'en'>(lang);
   const [copied, setCopied] = useState(false);
 
   // Computed field validation errors
@@ -497,7 +501,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   const handleCopyCode = () => {
     if (!createdStore) return;
     const baseUrl = window.location.origin;
-    const snippet = `<script src="${baseUrl}/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" async></script>`;
+    const snippet = `<script src="${baseUrl}/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" data-lang="${badgeLang}" async></script>`;
     navigator.clipboard.writeText(snippet);
     setCopied(true);
     setTimeout(() => setCopied(false), 2200);
@@ -1238,7 +1242,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   </h4>
                 </div>
 
-                <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                   <div className="flex-1 sm:flex-none">
                     <label className="block text-[10px] font-extrabold text-slate-500 mb-1">
                       {lang === 'ar' ? 'موقع الختم' : 'Placement'}
@@ -1248,8 +1252,9 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       onChange={(e) => setPlacement(e.target.value as any)}
                       className="w-full bg-[#F8FAFC] border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#047857]"
                     >
-                      <option value="bottom-right">{lang === 'ar' ? 'أسفل اليمين' : 'Bottom-Right'}</option>
-                      <option value="bottom-left">{lang === 'ar' ? 'أسفل اليسار' : 'Bottom-Left'}</option>
+                      <option value="bottom-right">{lang === 'ar' ? 'أسفل اليمين (عائم)' : 'Bottom-Right (Floating)'}</option>
+                      <option value="bottom-left">{lang === 'ar' ? 'أسفل اليسار (عائم)' : 'Bottom-Left (Floating)'}</option>
+                      <option value="inline">{lang === 'ar' ? 'ثابت داخل الصفحة (Footer/Header)' : 'Static / Inline (Footer/Header)'}</option>
                     </select>
                   </div>
 
@@ -1266,16 +1271,36 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       <option value="dark">{lang === 'ar' ? 'داكن' : 'Dark'}</option>
                     </select>
                   </div>
+
+                  <div className="flex-1 sm:flex-none">
+                    <label className="block text-[10px] font-extrabold text-slate-500 mb-1">
+                      {lang === 'ar' ? 'لغة الختم' : 'Badge Language'}
+                    </label>
+                    <select
+                      value={badgeLang}
+                      onChange={(e) => setBadgeLang(e.target.value as any)}
+                      className="w-full bg-[#F8FAFC] border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#047857]"
+                    >
+                      <option value="ar">{lang === 'ar' ? 'العربية' : 'Arabic'}</option>
+                      <option value="en">{lang === 'ar' ? 'الإنجليزية' : 'English'}</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
+              <p className="text-[11px] text-slate-500 font-medium -mt-2">
+                {lang === 'ar'
+                  ? 'اختر لغة الختم بحسب لغة موقعك، وليس بالضرورة نفس لغة هذه الصفحة.'
+                  : 'Pick the badge language to match your own site - it doesn\'t have to match this page\'s language.'}
+              </p>
+
               {/* Code Box & Copy */}
               <div className="space-y-3">
-                <pre 
-                  className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-xs font-mono text-emerald-300 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed dir-ltr" 
+                <pre
+                  className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-xs font-mono text-emerald-300 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed dir-ltr"
                   dir="ltr"
                 >
-                  {`<script src="${window.location.origin}/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" data-lang="${lang}" async></script>`}
+                  {`<script src="${window.location.origin}/badge.js" data-store="${createdStore.slug}" data-placement="${placement}" data-theme="${theme}" data-lang="${badgeLang}" async></script>`}
                 </pre>
 
                 <button
@@ -1340,7 +1365,11 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   <div className="h-2 bg-slate-200/60 rounded-md w-1/2 mx-auto sm:mx-0" />
                 </div>
 
-                <div className={`flex ${placement === 'bottom-left' ? 'justify-start' : 'justify-end'} pt-2`}>
+                <div className={
+                  placement === 'inline'
+                    ? 'flex justify-center pt-4 mt-2 border-t border-slate-200/60'
+                    : `flex ${placement === 'bottom-left' ? 'justify-start' : 'justify-end'} pt-2`
+                }>
                   <div
                     onClick={() => onOpenCertificate && onOpenCertificate(createdStore.slug)}
                     className={`group relative cursor-pointer rounded-full transition-all duration-300 shadow-lg border flex items-center gap-2.5 px-4 py-2.5 ${

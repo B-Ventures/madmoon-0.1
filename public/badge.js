@@ -232,7 +232,6 @@
           font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           box-sizing: border-box;
           direction: ${lang === 'ar' ? 'rtl' : 'ltr'};
-          z-index: 999999;
         }
         * {
           box-sizing: border-box;
@@ -243,6 +242,12 @@
           display: inline-flex;
           align-items: center;
           gap: 10px;
+          /* Sits above typical page chrome (sticky headers/navs) without
+             going to an absurd extreme - same range widely-used chat
+             widgets (Intercom, Crisp, etc.) use for their launcher. Only
+             matters for the floating pos-bottom-right/pos-bottom-left
+             variants; pos-inline stays in normal document flow. */
+          z-index: 999999;
           padding: 10px 16px;
           border-radius: 9999px;
           cursor: pointer;
